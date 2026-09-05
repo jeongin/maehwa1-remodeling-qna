@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, deleteUser }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { db, auth, state, RESIDENT_DOMAIN, PW_PREFIX, $ } from './core.js';
 import { openPwModal } from './password.js';
@@ -22,6 +22,7 @@ async function residentLogin() {
   const dong = $('gDong').value.trim();
   const ho = $('gHo').value.trim();
   const typed = $('gPw').value;
+  const code = $('gCode').value.trim();
   const err = $('gateError');
   const btn = $('gBtn');
 
@@ -46,15 +47,23 @@ async function residentLogin() {
         setBusy(btn, false, '입장하기');
         return;
       }
+      if (!code) {
+        err.textContent = '최초 입장이시면 조합 인증코드를 함께 입력해주세요.';
+        setBusy(btn, false, '입장하기');
+        return;
+      }
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, pw);
-        // 동·호수 명부 기록은 부가 기능이므로, 실패해도 입장을 막지 않는다.
+        // 인증코드는 보안 규칙이 대조한다. 틀리면 방금 만든 계정을 되돌린다.
         try {
           await setDoc(doc(db, 'users', cred.user.uid), {
-            dong, ho, pwChanged: false, createdAt: serverTimestamp()
-          }, { merge: true });
+            dong, ho, code, pwChanged: false, createdAt: serverTimestamp()
+          });
         } catch (e3) {
-          console.warn('명부 기록 실패 (입장은 계속):', e3.code || e3.message);
+          await deleteUser(cred.user).catch(() => {});
+          err.textContent = '조합 인증코드가 올바르지 않습니다.\n조합 사무실에 문의해주세요.';
+          setBusy(btn, false, '입장하기');
+          return;
         }
       } catch (e2) {
         err.textContent =
@@ -122,6 +131,7 @@ export function initAuth(onChange) {
       setBusy($('gBtn'), false, '입장하기');
       setBusy($('aBtn'), false, '관리자 로그인');
       $('gPw').value = '';
+      $('gCode').value = '';
       $('aPw').value = '';
       $('roleBadge').hidden = true;
       $('pwBtn').hidden = true;

@@ -10,6 +10,13 @@ service cloud.firestore {
            get(/databases/$(database)/documents/config/admins).data.emails;
     }
 
+    // 명부에 등록된 계정만 정상 조합원으로 본다.
+    // 인증코드 없이 만들어진 계정은 명부 문서가 없어 아무것도 할 수 없다.
+    function verified() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     function isAuthor() {
       return signedIn() && resource.data.authorUid == request.auth.uid;
     }
@@ -20,9 +27,15 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // 자주 묻는 질문 — 로그인한 조합원 모두 열람, 관리자만 작성.
+    // 최초 등록용 조합 인증코드.
+    // 클라이언트는 읽을 수 없고, 아래 users 규칙이 대조할 때만 쓰인다.
+    match /config/signup {
+      allow read, write: if false;
+    }
+
+    // 자주 묻는 질문 — 명부에 등록된 조합원과 관리자만 열람, 관리자만 작성.
     match /qa_items/{id} {
-      allow read: if signedIn();
+      allow read: if isAdmin() || verified();
       allow write: if isAdmin();
     }
 
@@ -30,7 +43,7 @@ service cloud.firestore {
     match /questions/{id} {
       allow read: if isAdmin() || isAuthor();
 
-      allow create: if signedIn()
+      allow create: if verified()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.category in
            ['법무·세무·회계', '설계', '이주·이주비', '총회', '주민설명회', '기타']
@@ -53,9 +66,19 @@ service cloud.firestore {
     }
 
     // 동·호수 명부. 본인과 관리자만 볼 수 있다.
+    // 최초 생성은 조합 인증코드가 일치해야만 통과한다.
     match /users/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow create, update: if signedIn() && request.auth.uid == uid;
+
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.code ==
+           get(/databases/$(database)/documents/config/signup).data.code;
+
+      // 비밀번호 변경 기록 등. 동·호수는 바꿀 수 없다.
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.dong == resource.data.dong
+        && request.resource.data.ho == resource.data.ho;
+
       allow delete: if false;
     }
   }
