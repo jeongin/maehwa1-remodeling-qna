@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signOut }
+import { getAuth, createUserWithEmailAndPassword, signOut, deleteUser }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { collection, getDocs, doc, setDoc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -67,9 +67,15 @@ async function run() {
     try {
       const cred = await createUserWithEmailAndPassword(
         wa, `${dong}-${ho}@${RESIDENT_DOMAIN}`, PW_PREFIX + password);
-      await setDoc(doc(db, 'users', cred.user.uid), {
-        dong, ho, pwChanged: false, createdAt: serverTimestamp()
-      });
+      try {
+        await setDoc(doc(db, 'users', cred.user.uid), {
+          dong, ho, pwChanged: false, createdAt: serverTimestamp()
+        });
+      } catch (e2) {
+        // 명부 없는 계정은 아무것도 못 하므로 계정째 되돌린다.
+        await deleteUser(cred.user).catch(() => {});
+        throw e2;
+      }
       created++;
     } catch (e) {
       if (e.code === 'auth/email-already-in-use') exists++;
