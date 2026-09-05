@@ -70,7 +70,7 @@ function render() {
   if (!list.length) {
     el.innerHTML = emptyState(q ? '🔍' : '📋', q
       ? `'${esc(q)}'에 대한 결과가 없습니다.`
-      : '아직 등록된 자주 묻는 질문이 없습니다.<br>궁금한 점은 질문 게시판에 남겨주세요.');
+      : '아직 등록된 자주 묻는 질문이 없습니다.<br>궁금한 점은 질문 등록하기 탭에서 남겨주세요.');
     return;
   }
   el.innerHTML = list.map(i => `
