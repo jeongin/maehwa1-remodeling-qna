@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyA9TZ_xoEY40CmQz8h1gGL2579rwMu0yso",
   authDomain: "maehwa-1-remodeling.firebaseapp.com",
   projectId: "maehwa-1-remodeling",

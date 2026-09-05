@@ -62,10 +62,10 @@ service cloud.firestore {
     }
 
     // 동·호수 명부. 본인과 관리자만 볼 수 있다.
-    // 계정은 조합이 사전 등록하므로 클라이언트는 만들 수 없다.
+    // 계정은 조합원 관리 탭에서 관리자가 일괄 등록한다.
     match /users/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow create: if false;
+      allow create: if isAdmin();
 
       // 비밀번호 변경 기록 등. 동·호수는 바꿀 수 없다.
       allow update: if signedIn() && request.auth.uid == uid

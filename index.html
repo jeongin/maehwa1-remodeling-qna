@@ -91,6 +91,7 @@
   <div class="tabs" id="tabs">
     <button class="tab active" data-tab="faq">자주 묻는 질문</button>
     <button class="tab" data-tab="board">질문 등록하기</button>
+    <button class="tab" id="tab-admin" data-tab="admin" hidden>조합원 관리</button>
   </div>
 </header>
 
@@ -111,6 +112,32 @@
   <div class="filter-row" id="boardFilters"></div>
   <div class="stats-bar" id="boardStats"></div>
   <div class="qa-list" id="boardList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+</main>
+
+<!-- ── 조합원 관리 (관리자 전용) ── -->
+<main id="panel-admin" hidden>
+  <div class="notice">
+    🔑 <strong>조합원 계정 일괄 등록</strong> — <code>동,호수,비밀번호</code> 형식의 CSV 를 올리면
+    계정이 만들어집니다. 비밀번호는 휴대폰 뒷 4자리를 넣으시면 되고, 조합원은 첫 입장 시 변경하게 됩니다.
+  </div>
+
+  <div class="admin-box">
+    <label>CSV 파일</label>
+    <input type="file" id="csvFile" accept=".csv,text/csv" class="form-control">
+    <label style="margin-top:14px">또는 직접 붙여넣기</label>
+    <textarea class="form-control" id="csvText" rows="6" placeholder="dong,ho,password&#10;103,305,3166&#10;104,601,2921"></textarea>
+    <div class="admin-actions">
+      <button class="btn-cancel" id="csvCheckBtn">검사만</button>
+      <button class="btn-primary" id="csvRunBtn">등록 실행</button>
+    </div>
+    <div class="admin-log" id="csvLog"></div>
+  </div>
+
+  <div class="stats-bar" id="rosterStats" style="margin-top:24px"></div>
+  <div class="admin-box">
+    <input type="text" id="rosterSearch" class="form-control" placeholder="동·호수로 검색">
+    <div class="roster" id="rosterList"></div>
+  </div>
 </main>
 
 <button class="fab" id="fab" hidden>＋</button>

@@ -10,7 +10,8 @@ assets/styles.css     스타일
 assets/core.js        Firebase 초기화 · 공용 상수/헬퍼
 assets/auth.js        로그인 게이트 (동호수 + 휴대폰 뒷자리, 관리자 이메일)
 assets/faq.js         자주 묻는 질문 탭
-assets/board.js       질문 게시판 탭
+assets/board.js       질문 등록하기 탭
+assets/admin.js       조합원 관리 탭 (관리자 전용)
 assets/app.js         탭 전환 · 모달 · 부트스트랩
 firestore.rules       Firestore 보안 규칙
 ```
@@ -57,11 +58,24 @@ Firebase 에 저장되는 비밀번호는 `PW_PREFIX + 사용자가 입력한 �
 
 ## 조합원 계정 일괄 등록
 
-계정은 화면에서 자동 생성되지 않습니다. `tools/import-residents.js` 로
-한 번에 등록합니다. 로컬에서 도는 Admin SDK 라 Blaze 플랜이 필요 없습니다.
+관리자로 로그인하면 **조합원 관리** 탭이 나타납니다. `동,호수,비밀번호`
+형식의 CSV 를 올리거나 붙여넣으면 계정이 생성됩니다. 비밀번호에는 휴대폰
+뒷 4자리를 넣으면 되고, 조합원은 첫 입장 시 변경하게 됩니다.
 
-1. Firebase 콘솔 → 프로젝트 설정 → **서비스 계정** → 새 비공개 키 생성
-2. 준비물 설치와 실행
+계정 생성은 보조 Firebase 앱 인스턴스(`resident-writer`)에서 수행합니다.
+기본 앱에서 만들면 새로 만든 계정으로 로그인되어 관리자 세션이 끊기기
+때문입니다. 명부 문서는 관리자 세션에서 쓰므로 `users` 생성 규칙은
+`isAdmin()` 으로 통과합니다.
+
+이미 등록된 세대는 건너뜁니다. **클라이언트 SDK 는 남의 비밀번호를 바꿀 수
+없어서, 화면에서의 비밀번호 초기화는 불가능합니다.** 초기화하려면 콘솔에서
+해당 계정을 삭제한 뒤 다시 올리거나, 아래 스크립트를 쓰세요.
+
+### 대량 등록은 스크립트가 안전합니다
+
+브라우저에서 수백 건을 연속 생성하면 Firebase 의 남용 방지 쿼터에 걸릴 수
+있습니다. 전체 조합원 최초 등록은 `tools/import-residents.js` 를 권합니다.
+이 스크립트는 기존 세대의 **비밀번호 재설정도 처리**합니다.
 
 ```bash
 npm i firebase-admin
@@ -69,12 +83,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=/경로/serviceAccount.json
 node tools/import-residents.js residents.csv
 ```
 
-CSV 형식은 `tools/residents.sample.csv` 참고 (`dong,ho,password`).
-비밀번호는 휴대폰 뒷 4자리를 넣으면 됩니다. 스크립트가 `PW_PREFIX` 를 붙여
-저장하므로 CSV 에는 접두사를 쓰지 않습니다.
-
-이미 있는 세대는 **비밀번호만 새로 지정**되고 `pwChanged` 가 `false` 로
-되돌아갑니다. 비밀번호를 잊은 조합원의 재설정에도 같은 스크립트를 씁니다.
+서비스 계정 키는 Firebase 콘솔 → 프로젝트 설정 → 서비스 계정에서 발급합니다.
 
 > 서비스 계정 키와 조합원 CSV 는 절대 저장소에 넣지 마세요. `.gitignore`
 > 에 등록해 두었습니다.

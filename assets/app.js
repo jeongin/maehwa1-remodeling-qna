@@ -3,15 +3,19 @@ import { initAuth } from './auth.js';
 import { initFaq, subscribeFaq, openFaqModal } from './faq.js';
 import { initBoard, subscribeBoard, openPostModal } from './board.js';
 import { initPassword } from './password.js';
+import { initAdmin, loadRoster } from './admin.js';
 
 function applyTab() {
-  const onFaq = state.tab === 'faq';
-  $('panel-faq').hidden = !onFaq;
-  $('panel-board').hidden = onFaq;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === state.tab));
-  // FAQ 는 관리자만 등록. 질문 게시판은 조합원과 관리자 모두 작성한다.
-  $('fab').hidden = !state.user || (onFaq && !state.isAdmin);
-  $('fab').title = onFaq ? '새 Q&A 추가' : '질문 작성';
+  if (state.tab === 'admin' && !state.isAdmin) state.tab = 'faq';
+  const tab = state.tab;
+  $('panel-faq').hidden = tab !== 'faq';
+  $('panel-board').hidden = tab !== 'board';
+  $('panel-admin').hidden = tab !== 'admin';
+  $('tab-admin').hidden = !state.isAdmin;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  // FAQ 는 관리자만 등록. 질문 등록하기는 조합원과 관리자 모두 작성한다.
+  $('fab').hidden = !state.user || tab === 'admin' || (tab === 'faq' && !state.isAdmin);
+  $('fab').title = tab === 'faq' ? '새 Q&A 추가' : '질문 작성';
 }
 
 function initShell() {
@@ -44,10 +48,12 @@ initShell();
 initFaq();
 initBoard();
 initPassword();
+initAdmin();
 
 initAuth(signedIn => {
   if (!signedIn) state.tab = 'faq';
   applyTab();
   subscribeFaq();
   subscribeBoard();
+  if (signedIn && state.isAdmin) loadRoster();
 });
