@@ -85,6 +85,13 @@ export function initAuth(onChange) {
   $('toAdmin').addEventListener('click', () => showGate(true));
   $('toResident').addEventListener('click', () => showGate(false));
   $('gPw').addEventListener('keydown', e => { if (e.key === 'Enter') residentLogin(); });
+  // 동·호수는 숫자만 받는다. 붙여넣기로 들어온 문자도 걸러낸다.
+  ['gDong', 'gHo'].forEach(id => {
+    $(id).addEventListener('input', e => {
+      const digits = e.target.value.replace(/\D/g, '');
+      if (digits !== e.target.value) e.target.value = digits;
+    });
+  });
   $('aPw').addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
   $('logoutBtn').addEventListener('click', async () => {
     if (confirm('로그아웃 하시겠습니까?')) await signOut(auth);
