@@ -126,6 +126,8 @@
     <input type="file" id="csvFile" accept=".csv,text/csv" class="form-control">
     <label style="margin-top:14px">또는 직접 붙여넣기</label>
     <textarea class="form-control" id="csvText" rows="6" placeholder="dong,ho,password&#10;103,305,3166&#10;104,601,2921"></textarea>
+    <label style="margin-top:14px">등록 간격 (밀리초) — 길수록 한도에 덜 걸립니다</label>
+    <input type="number" id="csvDelay" class="form-control" value="600" min="0" max="5000" step="100">
     <div class="admin-actions">
       <button class="btn-cancel" id="csvCheckBtn">검사만</button>
       <button class="btn-primary" id="csvRunBtn">등록 실행</button>

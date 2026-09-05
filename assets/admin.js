@@ -58,12 +58,15 @@ async function run() {
   const btn = $('csvRunBtn');
   btn.disabled = true;
   const wa = workerAuth();
-  let created = 0, exists = 0;
+  const gap = Math.max(0, Number($('csvDelay').value) || 0);
+  let created = 0, exists = 0, i = 0;
+  let throttled = false;
   const failures = [];
 
-  for (let i = 0; i < rows.length; i++) {
+  for (; i < rows.length; i++) {
     const { dong, ho, password } = rows[i];
     log(`등록 중... ${i + 1} / ${rows.length}<br>신규 ${created} · 기존 ${exists} · 실패 ${failures.length}`);
+    if (i > 0 && gap) await new Promise(r => setTimeout(r, gap));
     try {
       const cred = await createUserWithEmailAndPassword(
         wa, `${dong}-${ho}@${RESIDENT_DOMAIN}`, PW_PREFIX + password);
@@ -78,14 +81,21 @@ async function run() {
       }
       created++;
     } catch (e) {
-      if (e.code === 'auth/email-already-in-use') exists++;
-      else failures.push(`${dong}동 ${ho}호 — ${e.code || e.message}`);
+      if (e.code === 'auth/email-already-in-use') { exists++; continue; }
+      // 쿼터에 걸리면 남은 건 어차피 전부 실패한다. 헛되이 두드리지 않고 멈춘다.
+      if (e.code === 'auth/too-many-requests') { throttled = true; break; }
+      failures.push(`${dong}동 ${ho}호 — ${e.code || e.message}`);
     }
   }
   await signOut(wa).catch(() => {});
 
-  log(`<span class="ok">완료 — 신규 ${created}세대, 이미 등록됨 ${exists}세대, 실패 ${failures.length}세대</span>`
-    + (exists ? `<div class="note">이미 있는 세대는 건너뛰었습니다. 비밀번호를 초기화하려면 Firebase 콘솔에서 계정을 삭제한 뒤 다시 올려주세요.</div>` : '')
+  const rest = rows.length - i;
+  log(`<span class="${throttled ? 'bad' : 'ok'}">${throttled ? '중단됨' : '완료'} — `
+    + `신규 ${created}세대, 이미 등록됨 ${exists}세대, 실패 ${failures.length}세대</span>`
+    + (throttled ? `<div class="note">Firebase 계정 생성 한도에 걸렸습니다. <strong>남은 ${rest}세대</strong>는 등록되지 않았습니다.<br>
+        시간을 두고 같은 CSV 를 다시 올리면 등록된 세대는 건너뛰고 이어서 진행합니다.<br>
+        전체 명부처럼 건수가 많으면 tools/import-residents.js 스크립트를 쓰세요. 이 한도가 없습니다.</div>` : '')
+    + (exists ? `<div class="note">이미 있는 세대는 건너뛰었습니다. 비밀번호를 초기화하려면 콘솔에서 계정을 삭제한 뒤 다시 올려주세요.</div>` : '')
     + (failures.length ? `<div class="bad">${failures.map(esc).join('<br>')}</div>` : ''));
   btn.disabled = false;
   loadRoster();
