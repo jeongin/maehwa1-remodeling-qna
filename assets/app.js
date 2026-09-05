@@ -2,6 +2,7 @@ import { state, $, closeModal } from './core.js';
 import { initAuth } from './auth.js';
 import { initFaq, subscribeFaq, openFaqModal } from './faq.js';
 import { initBoard, subscribeBoard, openPostModal } from './board.js';
+import { initSeed } from './seed.js';
 
 function applyTab() {
   const onFaq = state.tab === 'faq';
@@ -45,4 +46,5 @@ initAuth(signedIn => {
   applyTab();
   subscribeFaq();
   subscribeBoard();
+  if (signedIn) initSeed();
 });
