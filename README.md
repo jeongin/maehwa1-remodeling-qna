@@ -65,12 +65,45 @@ npx serve -l 4173 .
 
 `main` 브랜치에 푸시하면 GitHub Pages가 자동 반영합니다.
 
-## 커스텀 도메인 붙이기 (나중에)
+## 커스텀 도메인 (maehwa1-remodeling.com)
 
-1. 저장소 루트에 도메인만 적힌 `CNAME` 파일 추가 (예: `maehwa1.com`)
-2. 등록업체 DNS에 레코드 추가
-   - `A` @ → `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
-   - `CNAME` www → `<GitHub 사용자명>.github.io`
-3. GitHub 저장소 **Settings → Pages**에서 도메인 입력 후 *Enforce HTTPS* 체크
-4. **Firebase 콘솔 → Authentication → Settings → 승인된 도메인**에 새 도메인 추가
-   (이 단계를 빠뜨리면 새 주소에서 로그인이 막힙니다)
+저장소 루트의 `CNAME` 파일이 도메인을 지정합니다. 나머지는 Spaceship DNS와
+Firebase 콘솔에서 한 번만 설정하면 됩니다.
+
+### 1. Spaceship DNS 레코드
+
+Spaceship → 해당 도메인 → DNS 레코드 화면에서 아래를 추가합니다.
+파킹 페이지용 기본 레코드가 있으면 먼저 지웁니다.
+
+| 종류 | 호스트 | 값 |
+|---|---|---|
+| A | @ | 185.199.108.153 |
+| A | @ | 185.199.109.153 |
+| A | @ | 185.199.110.153 |
+| A | @ | 185.199.111.153 |
+| CNAME | www | jeongin.github.io |
+
+IPv6도 쓰려면 AAAA 레코드로 `2606:50c0:8000::153`, `2606:50c0:8001::153`,
+`2606:50c0:8002::153`, `2606:50c0:8003::153` 를 `@` 에 추가합니다. 선택 사항입니다.
+
+### 2. GitHub Pages
+
+`CNAME` 파일이 푸시되면 **Settings → Pages** 의 커스텀 도메인이 자동으로 채워집니다.
+DNS 검사가 통과하고 인증서가 발급된 뒤 **Enforce HTTPS** 를 켭니다.
+발급까지 보통 몇 분에서 최대 24시간 걸립니다.
+
+### 3. Firebase 승인된 도메인 (필수)
+
+**Authentication → Settings → 승인된 도메인** 에 아래 둘을 추가합니다.
+
+- `maehwa1-remodeling.com`
+- `www.maehwa1-remodeling.com`
+
+이 단계를 빠뜨리면 새 주소에서 로그인이 `auth/unauthorized-domain` 으로 실패합니다.
+
+### 확인
+
+```bash
+dig +short maehwa1-remodeling.com
+curl -sI https://maehwa1-remodeling.com | head -1
+```
