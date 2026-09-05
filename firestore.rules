@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email in
+           get(/databases/$(database)/documents/config/admins).data.emails;
+    }
+
+    function isAuthor() {
+      return signedIn() && resource.data.authorUid == request.auth.uid;
+    }
+
+    // 관리자 이메일 목록. 콘솔에서만 수정한다.
+    match /config/admins {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // 자주 묻는 질문 — 로그인한 조합원 모두 열람, 관리자만 작성.
+    match /qa_items/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // 질문 게시판 — 작성자 본인과 관리자만 읽을 수 있다.
+    match /questions/{id} {
+      allow read: if isAdmin() || isAuthor();
+
+      allow create: if signedIn()
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.category in ['법무·세무·회계', '설계', '이주·이주비', '기타']
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 80
+        && request.resource.data.content is string
+        && request.resource.data.content.size() <= 5000
+        && request.resource.data.answer == ''
+        && request.resource.data.status == 'pending';
+
+      // 관리자는 답변을 달 수 있고, 작성자는 답변 전 자기 글만 고칠 수 있다.
+      allow update: if isAdmin()
+        || (isAuthor()
+            && request.resource.data.authorUid == resource.data.authorUid
+            && request.resource.data.answer == resource.data.answer
+            && request.resource.data.status == resource.data.status);
+
+      allow delete: if isAdmin() || isAuthor();
+    }
+
+    // 동·호수 명부. 본인과 관리자만 볼 수 있다.
+    match /users/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if signedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+  }
+}
