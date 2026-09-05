@@ -18,9 +18,10 @@
   <div class="gate-box">
     <div class="gate-logo">🏗</div>
     <div class="gate-title">매화마을1단지<br>리모델링 Q&amp;A</div>
-    <div class="gate-sub">주민설명회 사전질의 페이지입니다.<br>동·호수와 휴대폰 뒷자리 4자리로 입장하세요.</div>
+    <div class="gate-sub">주민설명회 사전질의 페이지입니다.</div>
 
     <div class="gate-form" id="residentForm">
+      <div class="gate-section">아이디 — 동·호수</div>
       <div class="gate-row">
         <div>
           <label class="gate-label">동</label>
@@ -31,11 +32,12 @@
           <input class="gate-input" id="gHo" inputmode="numeric" maxlength="5" placeholder="1503">
         </div>
       </div>
-      <label class="gate-label">비밀번호</label>
+      <div class="gate-section">비밀번호</div>
       <input class="gate-input" id="gPw" type="password" placeholder="휴대폰 뒷자리 4자리">
       <button class="gate-btn" id="gBtn">입장하기</button>
       <div class="gate-error" id="gateError"></div>
-      <div class="gate-hint">처음 입장하실 때는 <strong>휴대폰 뒷 4자리</strong>를 입력하세요.<br>첫 입장 후 비밀번호를 변경하시게 됩니다.</div>
+      <div class="gate-hint">최초 비밀번호는 <strong>휴대폰 번호 뒷 4자리</strong>입니다.<br>첫 입장 시 비밀번호를 변경하셔야 합니다.</div>
+      <div class="gate-help">비밀번호를 잊으셨나요?<br><strong>조합 사무실로 문의</strong>해 주세요.</div>
       <div class="gate-switch"><button type="button" id="toAdmin">관리자 로그인</button></div>
     </div>
 
