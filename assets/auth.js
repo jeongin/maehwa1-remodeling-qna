@@ -43,9 +43,14 @@ async function residentLogin() {
     if (['auth/user-not-found', 'auth/invalid-credential', 'auth/wrong-password'].includes(e.code)) {
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, pw);
-        await setDoc(doc(db, 'users', cred.user.uid), {
-          dong, ho, createdAt: serverTimestamp()
-        }, { merge: true });
+        // 동·호수 명부 기록은 부가 기능이므로, 실패해도 입장을 막지 않는다.
+        try {
+          await setDoc(doc(db, 'users', cred.user.uid), {
+            dong, ho, createdAt: serverTimestamp()
+          }, { merge: true });
+        } catch (e3) {
+          console.warn('명부 기록 실패 (입장은 계속):', e3.code || e3.message);
+        }
       } catch (e2) {
         err.textContent =
           e2.code === 'auth/email-already-in-use'
