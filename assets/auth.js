@@ -144,11 +144,12 @@ export function initAuth(onChange) {
     badge.className = `role-badge ${state.isAdmin ? 'admin' : 'member'}`;
 
     $('gateScreen').style.display = 'none';
-    $('pwBtn').hidden = state.isAdmin || !who;
+    $('pwBtn').hidden = !who;
     onChange(true);
 
-    // 조합원이 아직 비밀번호를 바꾸지 않았다면 변경 전까지 이용을 막는다.
-    if (!state.isAdmin && who) {
+    // 동·호수 계정은 관리자 여부와 무관하게 최초 비밀번호를 바꿔야 한다.
+    // 관리자 권한 계정이 휴대폰 뒷 4자리로 남아 있는 편이 더 위험하다.
+    if (who) {
       try {
         const prof = await getDoc(doc(db, 'users', user.uid));
         if (!prof.exists() || prof.data().pwChanged !== true) openPwModal(true);
