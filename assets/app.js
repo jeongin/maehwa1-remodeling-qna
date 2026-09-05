@@ -9,8 +9,8 @@ function applyTab() {
   $('panel-faq').hidden = !onFaq;
   $('panel-board').hidden = onFaq;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === state.tab));
-  // FAQ 는 관리자만 등록, 질문 게시판은 조합원만 작성한다.
-  $('fab').hidden = !state.user || (onFaq ? !state.isAdmin : state.isAdmin);
+  // FAQ 는 관리자만 등록. 질문 게시판은 조합원과 관리자 모두 작성한다.
+  $('fab').hidden = !state.user || (onFaq && !state.isAdmin);
   $('fab').title = onFaq ? '새 Q&A 추가' : '질문 작성';
 }
 

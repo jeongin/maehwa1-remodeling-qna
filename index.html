@@ -34,11 +34,9 @@
       </div>
       <div class="gate-section">비밀번호</div>
       <input class="gate-input" id="gPw" type="password" placeholder="휴대폰 뒷자리 4자리">
-      <div class="gate-section">조합 인증코드</div>
-      <input class="gate-input" id="gCode" placeholder="최초 입장 시에만 입력">
       <button class="gate-btn" id="gBtn">입장하기</button>
       <div class="gate-error" id="gateError"></div>
-      <div class="gate-hint">최초 입장 시 비밀번호는 <strong>휴대폰 번호 뒷 4자리</strong>이며,<br><strong>조합 인증코드</strong>를 함께 입력해야 합니다.<br>두 번째 입장부터는 인증코드가 필요 없습니다.</div>
+      <div class="gate-hint">최초 비밀번호는 <strong>휴대폰 번호 뒷 4자리</strong>입니다.<br>첫 입장 시 비밀번호를 변경하셔야 합니다.</div>
       <div class="gate-help">
         비밀번호를 잊으셨나요? 조합 사무실로 문의해 주세요.<br>
         <a class="gate-tel" href="tel:031-707-6648">조합사무실 031-707-6648</a><br>
@@ -144,6 +142,17 @@
     <div class="form-group">
       <label>질문 내용 *</label>
       <textarea class="form-control" id="pContent" rows="6" placeholder="궁금한 점을 자세히 적어주세요"></textarea>
+    </div>
+    <div class="form-group" id="pAuthorGroup" hidden>
+      <label>작성자 동·호수 (비우면 조합 등록으로 표시)</label>
+      <div class="gate-row">
+        <input type="text" class="form-control" id="pDong" placeholder="동">
+        <input type="text" class="form-control" id="pHo" placeholder="호수">
+      </div>
+    </div>
+    <div class="form-group" id="pAnswerGroup" hidden>
+      <label>답변 (선택)</label>
+      <textarea class="form-control" id="pAnswer" rows="4" placeholder="바로 답변을 등록하려면 입력하세요"></textarea>
     </div>
     <div class="form-actions">
       <button class="btn-cancel" data-close="postModal">취소</button>

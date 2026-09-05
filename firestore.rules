@@ -11,7 +11,7 @@ service cloud.firestore {
     }
 
     // 명부에 등록된 계정만 정상 조합원으로 본다.
-    // 인증코드 없이 만들어진 계정은 명부 문서가 없어 아무것도 할 수 없다.
+    // 명부 문서가 없는 계정은 FAQ 열람도 질문 등록도 되지 않는다.
     function verified() {
       return signedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid));
@@ -27,12 +27,6 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // 최초 등록용 조합 인증코드.
-    // 클라이언트는 읽을 수 없고, 아래 users 규칙이 대조할 때만 쓰인다.
-    match /config/signup {
-      allow read, write: if false;
-    }
-
     // 자주 묻는 질문 — 명부에 등록된 조합원과 관리자만 열람, 관리자만 작성.
     match /qa_items/{id} {
       allow read: if isAdmin() || verified();
@@ -43,7 +37,9 @@ service cloud.firestore {
     match /questions/{id} {
       allow read: if isAdmin() || isAuthor();
 
-      allow create: if verified()
+      // 관리자는 답변까지 채워서 바로 등록할 수 있다.
+      allow create: if isAdmin()
+        || (verified()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.category in
            ['법무·세무·회계', '설계', '이주·이주비', '총회', '주민설명회', '기타']
@@ -53,7 +49,7 @@ service cloud.firestore {
         && request.resource.data.content is string
         && request.resource.data.content.size() <= 5000
         && request.resource.data.answer == ''
-        && request.resource.data.status == 'pending';
+        && request.resource.data.status == 'pending');
 
       // 관리자는 답변을 달 수 있고, 작성자는 답변 전 자기 글만 고칠 수 있다.
       allow update: if isAdmin()
@@ -66,13 +62,10 @@ service cloud.firestore {
     }
 
     // 동·호수 명부. 본인과 관리자만 볼 수 있다.
-    // 최초 생성은 조합 인증코드가 일치해야만 통과한다.
+    // 계정은 조합이 사전 등록하므로 클라이언트는 만들 수 없다.
     match /users/{uid} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-
-      allow create: if signedIn() && request.auth.uid == uid
-        && request.resource.data.code ==
-           get(/databases/$(database)/documents/config/signup).data.code;
+      allow create: if false;
 
       // 비밀번호 변경 기록 등. 동·호수는 바꿀 수 없다.
       allow update: if signedIn() && request.auth.uid == uid

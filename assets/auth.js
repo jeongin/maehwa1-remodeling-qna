@@ -1,5 +1,5 @@
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, deleteUser }
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { db, auth, state, RESIDENT_DOMAIN, PW_PREFIX, $ } from './core.js';
 import { openPwModal } from './password.js';
@@ -22,7 +22,6 @@ async function residentLogin() {
   const dong = $('gDong').value.trim();
   const ho = $('gHo').value.trim();
   const typed = $('gPw').value;
-  const code = $('gCode').value.trim();
   const err = $('gateError');
   const btn = $('gBtn');
 
@@ -41,45 +40,14 @@ async function residentLogin() {
   try {
     await signInWithEmailAndPassword(auth, email, pw);
   } catch (e) {
-    if (['auth/user-not-found', 'auth/invalid-credential', 'auth/wrong-password'].includes(e.code)) {
-      if (!/^\d{4}$/.test(typed)) {
-        err.textContent = '비밀번호가 올바르지 않습니다.';
-        setBusy(btn, false, '입장하기');
-        return;
-      }
-      if (!code) {
-        err.textContent = '최초 입장이시면 조합 인증코드를 함께 입력해주세요.';
-        setBusy(btn, false, '입장하기');
-        return;
-      }
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, pw);
-        // 인증코드는 보안 규칙이 대조한다. 틀리면 방금 만든 계정을 되돌린다.
-        try {
-          await setDoc(doc(db, 'users', cred.user.uid), {
-            dong, ho, code, pwChanged: false, createdAt: serverTimestamp()
-          });
-        } catch (e3) {
-          await deleteUser(cred.user).catch(() => {});
-          err.textContent = '조합 인증코드가 올바르지 않습니다.\n조합 사무실에 문의해주세요.';
-          setBusy(btn, false, '입장하기');
-          return;
-        }
-      } catch (e2) {
-        err.textContent =
-          e2.code === 'auth/email-already-in-use'
-            ? `${dong}동 ${ho}호는 이미 등록되어 있습니다.\n휴대폰 뒷자리를 다시 확인해주세요.`
-            : e2.code === 'auth/operation-not-allowed'
-              ? 'Firebase 콘솔에서 이메일/비밀번호 로그인을 활성화해주세요.'
-              : '입장 오류: ' + e2.message;
-        setBusy(btn, false, '입장하기');
-      }
-    } else {
-      err.textContent = e.code === 'auth/too-many-requests'
+    // 계정은 조합에서 미리 등록한다. 없는 세대는 여기서 걸린다.
+    err.textContent =
+      e.code === 'auth/too-many-requests'
         ? '시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.'
-        : '입장 오류: ' + e.message;
-      setBusy(btn, false, '입장하기');
-    }
+        : ['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password'].includes(e.code)
+          ? '등록되지 않은 세대이거나 비밀번호가 올바르지 않습니다.\n조합 사무실로 문의해주세요.'
+          : '입장 오류: ' + e.message;
+    setBusy(btn, false, '입장하기');
   }
 }
 
@@ -131,7 +99,6 @@ export function initAuth(onChange) {
       setBusy($('gBtn'), false, '입장하기');
       setBusy($('aBtn'), false, '관리자 로그인');
       $('gPw').value = '';
-      $('gCode').value = '';
       $('aPw').value = '';
       $('roleBadge').hidden = true;
       $('pwBtn').hidden = true;

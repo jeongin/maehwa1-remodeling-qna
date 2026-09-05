@@ -1,2 +1,7 @@
 .claude/
 .DS_Store
+node_modules/
+package-lock.json
+residents.csv
+serviceAccount*.json
+*-firebase-adminsdk-*.json

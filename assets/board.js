@@ -29,6 +29,12 @@ export function openPostModal(id = null) {
   $('pCategory').value = p?.category || BOARD_CATEGORIES[0];
   $('pTitle').value = p?.title || '';
   $('pContent').value = p?.content || '';
+  // 관리자는 작성자와 답변까지 함께 편집한다.
+  $('pAuthorGroup').hidden = !state.isAdmin;
+  $('pAnswerGroup').hidden = !state.isAdmin;
+  $('pDong').value = p?.authorDong || '';
+  $('pHo').value = p?.authorHo || '';
+  $('pAnswer').value = p?.answer || '';
   openModal('postModal');
   setTimeout(() => $('pTitle').focus(), 100);
 }
@@ -38,16 +44,28 @@ async function savePost() {
   const title = $('pTitle').value.trim();
   const content = $('pContent').value.trim();
   if (!title || !content) { alert('제목과 질문 내용을 모두 입력해주세요.'); return; }
+  const adm = state.isAdmin;
+  const answer = adm ? $('pAnswer').value.trim() : '';
   const btn = $('postSaveBtn');
   btn.disabled = true;
   try {
     if (editId) {
-      await updateDoc(doc(db, 'questions', editId), { category, title, content, updatedAt: serverTimestamp() });
+      const patch = { category, title, content, updatedAt: serverTimestamp() };
+      if (adm) {
+        patch.answer = answer;
+        patch.status = answer ? 'answered' : 'pending';
+        patch.authorDong = $('pDong').value.trim();
+        patch.authorHo = $('pHo').value.trim();
+      }
+      await updateDoc(doc(db, 'questions', editId), patch);
     } else {
       await addDoc(collection(db, 'questions'), {
         category, title, content,
-        authorUid: state.user.uid, authorDong: state.dong, authorHo: state.ho,
-        answer: '', status: 'pending', createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        authorUid: state.user.uid,
+        authorDong: adm ? $('pDong').value.trim() : state.dong,
+        authorHo: adm ? $('pHo').value.trim() : state.ho,
+        answer, status: answer ? 'answered' : 'pending',
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
       });
     }
     closeModal('postModal');
@@ -89,7 +107,8 @@ function card(p) {
           <div class="qa-meta">
             <span class="qa-tag">${esc(p.category)}</span>
             <span class="status ${answered ? 'answered' : 'pending'}">${answered ? '답변완료' : '답변대기'}</span>
-            ${state.isAdmin ? `<span class="qa-author">${esc(p.authorDong)}동 ${esc(p.authorHo)}호</span>` : ''}
+            ${state.isAdmin ? `<span class="qa-author">${p.authorDong && p.authorHo
+              ? `${esc(p.authorDong)}동 ${esc(p.authorHo)}호` : '조합 등록'}</span>` : ''}
             <span class="qa-date">${fmt(p.createdAt)}</span>
           </div>
         </div>
@@ -102,7 +121,8 @@ function card(p) {
           ? `<span class="qa-a-mark">A</span><span class="qa-a-text">${esc(p.answer)}</span>`
           : `<div class="qa-pending">아직 답변이 등록되지 않았습니다. 주민설명회에서 답변드릴 예정입니다.</div>`}
         <div class="qa-item-actions">
-          ${state.isAdmin ? `<button class="btn-sm" data-act="answer">💬 ${answered ? '답변 수정' : '답변 등록'}</button>` : ''}
+          ${state.isAdmin ? `<button class="btn-sm" data-act="answer">💬 ${answered ? '답변 수정' : '답변 등록'}</button>
+          <button class="btn-sm" data-act="edit">✏ 질문 수정</button>` : ''}
           ${!state.isAdmin && !answered ? `<button class="btn-sm" data-act="edit">✏ 수정</button>` : ''}
           ${canEdit ? `<button class="btn-sm danger" data-act="delete">🗑 삭제</button>` : ''}
         </div>
