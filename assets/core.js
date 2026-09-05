@@ -22,7 +22,7 @@ export const RESIDENT_DOMAIN = 'resident.maehwa1.kr';
 export const BOARD_CATEGORIES = ['법무·세무·회계', '설계', '이주·이주비', '기타'];
 
 /** 자주 묻는 질문 카테고리. 게시판과 분류 체계가 다르다. */
-export const FAQ_CATEGORIES = ['총회', '주민설명회', '책자', '기타'];
+export const FAQ_CATEGORIES = ['총회', '주민설명회'];
 
 /** 화면 전체가 공유하는 상태 */
 export const state = { user: null, isAdmin: false, dong: '', ho: '', tab: 'faq' };
