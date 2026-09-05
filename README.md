@@ -84,6 +84,9 @@ node tools/import-residents.js residents.csv
 ```
 
 서비스 계정 키는 Firebase 콘솔 → 프로젝트 설정 → 서비스 계정에서 발급합니다.
+스크립트는 `firebase-admin` 의 모듈러 API(`firebase-admin/app`, `/auth`,
+`/firestore`)를 씁니다. 구버전의 `admin.credential` 네임스페이스는 최신
+버전에서 제거되었습니다.
 
 > 서비스 계정 키와 조합원 CSV 는 절대 저장소에 넣지 마세요. `.gitignore`
 > 에 등록해 두었습니다.
