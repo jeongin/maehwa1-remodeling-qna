@@ -31,11 +31,11 @@
           <input class="gate-input" id="gHo" inputmode="numeric" maxlength="5" placeholder="1503">
         </div>
       </div>
-      <label class="gate-label">휴대폰 뒷자리 4자리</label>
-      <input class="gate-input" id="gPhone" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      <label class="gate-label">비밀번호</label>
+      <input class="gate-input" id="gPw" type="password" placeholder="휴대폰 뒷자리 4자리">
       <button class="gate-btn" id="gBtn">입장하기</button>
       <div class="gate-error" id="gateError"></div>
-      <div class="gate-hint">처음 입장하시면 입력한 정보로 자동 등록됩니다.<br>다음부터 같은 정보로 입장하세요.</div>
+      <div class="gate-hint">처음 입장하실 때는 <strong>휴대폰 뒷 4자리</strong>를 입력하세요.<br>첫 입장 후 비밀번호를 변경하시게 됩니다.</div>
       <div class="gate-switch"><button type="button" id="toAdmin">관리자 로그인</button></div>
     </div>
 
@@ -66,6 +66,7 @@
         <span class="dot loading" id="syncDot"></span>
         <span id="syncLabel">연결 중...</span>
       </div>
+      <button class="btn-header" id="pwBtn" hidden>🔑 비밀번호 변경</button>
       <button class="btn-header" id="logoutBtn">🔓 로그아웃</button>
     </div>
   </div>
@@ -155,6 +156,27 @@
     <div class="form-actions">
       <button class="btn-cancel" data-close="answerModal">취소</button>
       <button class="btn-primary" id="answerSaveBtn">답변 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 비밀번호 변경 모달 -->
+<div class="modal-overlay" id="pwModal">
+  <div class="modal">
+    <div class="modal-title" id="pwModalTitle">비밀번호 변경</div>
+    <div class="private-note" id="pwNote"></div>
+    <div class="form-group">
+      <label>새 비밀번호 (6자 이상)</label>
+      <input type="password" class="form-control" id="pwNew" placeholder="새 비밀번호">
+    </div>
+    <div class="form-group">
+      <label>새 비밀번호 확인</label>
+      <input type="password" class="form-control" id="pwNew2" placeholder="한 번 더 입력">
+    </div>
+    <div class="gate-error" id="pwError"></div>
+    <div class="form-actions">
+      <button class="btn-cancel" data-close="pwModal" id="pwCancel">취소</button>
+      <button class="btn-primary" id="pwSaveBtn">변경</button>
     </div>
   </div>
 </div>

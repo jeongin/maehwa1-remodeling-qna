@@ -1,10 +1,10 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { db, auth, state, RESIDENT_DOMAIN, $ } from './core.js';
+import { db, auth, state, RESIDENT_DOMAIN, PW_PREFIX, $ } from './core.js';
+import { openPwModal } from './password.js';
 
 const residentEmail = (dong, ho) => `${dong}-${ho}@${RESIDENT_DOMAIN}`;
-const residentPw = (dong, ho, phone) => `mh1-${phone}-${dong}${ho}`;
 
 /** 조합원 계정 이메일에서 동·호수를 되읽는다. */
 function parseResident(email) {
@@ -21,32 +21,37 @@ function setBusy(btn, busy, label) {
 async function residentLogin() {
   const dong = $('gDong').value.trim();
   const ho = $('gHo').value.trim();
-  const phone = $('gPhone').value.trim();
+  const typed = $('gPw').value;
   const err = $('gateError');
   const btn = $('gBtn');
 
   if (!/^\d{1,5}$/.test(dong) || !/^\d{1,5}$/.test(ho)) {
     err.textContent = '동과 호수를 숫자로 입력해주세요. (예: 101동 1503호)'; return;
   }
-  if (!/^\d{4}$/.test(phone)) {
-    err.textContent = '휴대폰 번호 뒷 4자리를 입력해주세요.'; return;
+  if (typed.length < 4) {
+    err.textContent = '비밀번호를 입력해주세요. (첫 입장은 휴대폰 뒷 4자리)'; return;
   }
 
   err.textContent = '';
   setBusy(btn, true, '입장하기');
   const email = residentEmail(dong, ho);
-  const pw = residentPw(dong, ho, phone);
+  const pw = PW_PREFIX + typed;
 
   try {
     await signInWithEmailAndPassword(auth, email, pw);
   } catch (e) {
     if (['auth/user-not-found', 'auth/invalid-credential', 'auth/wrong-password'].includes(e.code)) {
+      if (!/^\d{4}$/.test(typed)) {
+        err.textContent = '비밀번호가 올바르지 않습니다.';
+        setBusy(btn, false, '입장하기');
+        return;
+      }
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, pw);
         // 동·호수 명부 기록은 부가 기능이므로, 실패해도 입장을 막지 않는다.
         try {
           await setDoc(doc(db, 'users', cred.user.uid), {
-            dong, ho, createdAt: serverTimestamp()
+            dong, ho, pwChanged: false, createdAt: serverTimestamp()
           }, { merge: true });
         } catch (e3) {
           console.warn('명부 기록 실패 (입장은 계속):', e3.code || e3.message);
@@ -102,7 +107,7 @@ export function initAuth(onChange) {
   $('aBtn').addEventListener('click', adminLogin);
   $('toAdmin').addEventListener('click', () => showGate(true));
   $('toResident').addEventListener('click', () => showGate(false));
-  $('gPhone').addEventListener('keydown', e => { if (e.key === 'Enter') residentLogin(); });
+  $('gPw').addEventListener('keydown', e => { if (e.key === 'Enter') residentLogin(); });
   $('aPw').addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
   $('logoutBtn').addEventListener('click', async () => {
     if (confirm('로그아웃 하시겠습니까?')) await signOut(auth);
@@ -116,9 +121,10 @@ export function initAuth(onChange) {
       $('gateScreen').style.display = 'flex';
       setBusy($('gBtn'), false, '입장하기');
       setBusy($('aBtn'), false, '관리자 로그인');
-      $('gPhone').value = '';
+      $('gPw').value = '';
       $('aPw').value = '';
       $('roleBadge').hidden = true;
+      $('pwBtn').hidden = true;
       onChange(false);
       return;
     }
@@ -138,6 +144,17 @@ export function initAuth(onChange) {
     badge.className = `role-badge ${state.isAdmin ? 'admin' : 'member'}`;
 
     $('gateScreen').style.display = 'none';
+    $('pwBtn').hidden = state.isAdmin || !who;
     onChange(true);
+
+    // 조합원이 아직 비밀번호를 바꾸지 않았다면 변경 전까지 이용을 막는다.
+    if (!state.isAdmin && who) {
+      try {
+        const prof = await getDoc(doc(db, 'users', user.uid));
+        if (!prof.exists() || prof.data().pwChanged !== true) openPwModal(true);
+      } catch (e) {
+        console.warn('비밀번호 변경 여부 확인 실패:', e.code || e.message);
+      }
+    }
   });
 }

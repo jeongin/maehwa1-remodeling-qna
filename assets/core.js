@@ -18,6 +18,12 @@ export const auth = getAuth(app);
 /** 조합원 계정을 만들 때 쓰는 내부 도메인. 실제로 메일이 오가지 않습니다. */
 export const RESIDENT_DOMAIN = 'resident.maehwa1.kr';
 
+/**
+ * Firebase 비밀번호 = 이 접두사 + 사용자가 입력한 값.
+ * 최초 입력값은 휴대폰 뒷 4자리라 6자 최소 길이를 못 채우므로 접두사로 보강한다.
+ */
+export const PW_PREFIX = 'mh1!';
+
 /** 질문 게시판 카테고리 (firestore.rules 의 목록과 반드시 일치해야 함) */
 export const BOARD_CATEGORIES = ['법무·세무·회계', '설계', '이주·이주비', '총회', '주민설명회', '기타'];
 
