@@ -1,6 +1,6 @@
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, state, CATEGORIES, $, esc, fmt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
+import { db, state, BOARD_CATEGORIES, $, esc, fmt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
   from './core.js';
 
 let posts = [], filter = '전체', editId = null, answerId = null, unsub = null;
@@ -26,7 +26,7 @@ export function openPostModal(id = null) {
   editId = id;
   const p = id ? posts.find(x => x.id === id) : null;
   $('postModalTitle').textContent = id ? '질문 수정' : '질문 작성';
-  $('pCategory').value = p?.category || CATEGORIES[0];
+  $('pCategory').value = p?.category || BOARD_CATEGORIES[0];
   $('pTitle').value = p?.title || '';
   $('pContent').value = p?.content || '';
   openModal('postModal');
@@ -111,7 +111,7 @@ function card(p) {
 }
 
 function render() {
-  renderChips($('boardFilters'), CATEGORIES, filter);
+  renderChips($('boardFilters'), BOARD_CATEGORIES, filter);
   $('boardNotice').innerHTML = state.isAdmin
     ? '🔑 <strong>관리자 화면</strong> — 조합원이 등록한 모든 질문과 작성자 동·호수가 표시됩니다.'
     : '🔒 질문 내용은 <strong>관리자와 작성자 본인만</strong> 볼 수 있습니다. 아래 목록에는 내가 등록한 질문만 표시됩니다.';
@@ -131,7 +131,7 @@ function render() {
 }
 
 export function initBoard() {
-  fillCategorySelect($('pCategory'));
+  fillCategorySelect($('pCategory'), BOARD_CATEGORIES);
   $('postSaveBtn').addEventListener('click', savePost);
   $('answerSaveBtn').addEventListener('click', saveAnswer);
   $('boardFilters').addEventListener('click', e => {

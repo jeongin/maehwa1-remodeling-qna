@@ -43,6 +43,16 @@ firestore.rules       Firestore 보안 규칙
 
 ## 데이터 모델
 
+### 카테고리
+
+FAQ와 게시판은 분류 체계가 다릅니다. `assets/core.js` 에 정의돼 있습니다.
+
+- `FAQ_CATEGORIES` — 총회 / 주민설명회 / 책자 / 기타
+- `BOARD_CATEGORIES` — 법무·세무·회계 / 설계 / 이주·이주비 / 기타
+
+게시판 카테고리를 바꿀 때는 `firestore.rules` 의 `create` 조건에 있는 목록도
+함께 고쳐야 합니다. FAQ 카테고리는 규칙에서 검사하지 않습니다.
+
 | 컬렉션 | 용도 | 읽기 권한 |
 |---|---|---|
 | `qa_items` | 자주 묻는 질문 | 로그인한 모든 조합원 |

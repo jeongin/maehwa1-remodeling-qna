@@ -1,6 +1,6 @@
 import { collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, state, CATEGORIES, $, esc, hi, fmt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
+import { db, state, FAQ_CATEGORIES, $, esc, hi, fmt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
   from './core.js';
 
 let items = [], filter = '전체', editId = null, unsub = null;
@@ -24,7 +24,7 @@ export function openFaqModal(id = null) {
   editId = id;
   const item = id ? items.find(i => i.id === id) : null;
   $('faqModalTitle').textContent = id ? 'Q&A 수정' : '새 Q&A 추가';
-  $('fCategory').value = item?.category || CATEGORIES[0];
+  $('fCategory').value = item?.category || FAQ_CATEGORIES[0];
   $('fQuestion').value = item?.question || '';
   $('fAnswer').value = item?.answer || '';
   openModal('faqModal');
@@ -53,8 +53,8 @@ async function save() {
 
 function render() {
   const q = $('searchInput').value.trim().toLowerCase();
-  const cats = CATEGORIES.filter(c => items.some(i => i.category === c));
-  const extra = [...new Set(items.map(i => i.category).filter(c => c && !CATEGORIES.includes(c)))];
+  const cats = FAQ_CATEGORIES.filter(c => items.some(i => i.category === c));
+  const extra = [...new Set(items.map(i => i.category).filter(c => c && !FAQ_CATEGORIES.includes(c)))];
   renderChips($('faqFilters'), [...cats, ...extra], filter);
 
   let list = items;
@@ -97,7 +97,7 @@ function render() {
 }
 
 export function initFaq() {
-  fillCategorySelect($('fCategory'));
+  fillCategorySelect($('fCategory'), FAQ_CATEGORIES);
   $('searchInput').addEventListener('input', render);
   $('faqSaveBtn').addEventListener('click', save);
   $('faqFilters').addEventListener('click', e => {
