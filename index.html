@@ -10,6 +10,9 @@
 </head>
 <body>
 
+<!-- 세션 복원이 끝날 때까지 덮어두는 화면. 로그인 화면 깜빡임을 막는다. -->
+<div id="bootScreen"><div class="spinner"></div></div>
+
 <!-- ── 로그인 게이트 ── -->
 <div id="gateScreen">
   <div class="gate-box">
@@ -157,5 +160,13 @@
 </div>
 
 <script type="module" src="assets/app.js"></script>
+<script>
+  // 모듈 로드 실패 등으로 세션 확인이 끝나지 않으면 로딩 화면에 갇힌다. 안내를 띄운다.
+  setTimeout(function () {
+    var b = document.getElementById('bootScreen');
+    if (b && !b.hidden) b.innerHTML = '<div class="empty-state"><div class="emoji">\u26a0\ufe0f</div>' +
+      '<p>연결이 지연되고 있습니다.<br>네트워크를 확인한 뒤 새로고침해 주세요.</p></div>';
+  }, 8000);
+</script>
 </body>
 </html>

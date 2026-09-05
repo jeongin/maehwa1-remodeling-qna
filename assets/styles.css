@@ -9,7 +9,9 @@
 body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
 /* ── 로그인 게이트 ── */
-#gateScreen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: flex-start; justify-content: center; z-index: 999; padding: 24px; overflow-y: auto; }
+#bootScreen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+/* 기본은 숨김. 세션 확인 후 auth.js 가 켠다. */
+#gateScreen { position: fixed; inset: 0; background: var(--bg); display: none; align-items: flex-start; justify-content: center; z-index: 999; padding: 24px; overflow-y: auto; }
 .gate-box { background: var(--surface); border-radius: 20px; margin: auto; padding: 40px 32px; width: 100%; max-width: 380px; box-shadow: 0 8px 48px rgba(44,95,138,0.15); text-align: center; }
 .gate-logo { font-size: 2.4rem; margin-bottom: 14px; }
 .gate-title { font-family: 'Noto Serif KR', serif; font-size: 1.15rem; font-weight: 700; color: var(--accent); margin-bottom: 6px; line-height: 1.4; }

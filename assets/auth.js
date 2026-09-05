@@ -110,6 +110,7 @@ export function initAuth(onChange) {
 
   onAuthStateChanged(auth, async user => {
     state.user = user;
+    $('bootScreen').hidden = true;
     if (!user) {
       state.isAdmin = false; state.dong = ''; state.ho = '';
       $('gateScreen').style.display = 'flex';
