@@ -33,9 +33,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // 질문 게시판 — 작성자 본인과 관리자만 읽을 수 있다.
+    // 질문 게시판 — 작성자 본인과 관리자가 읽는다.
+    // 공개로 설정된 질문은 답변이 등록된 뒤에야 다른 조합원에게 열린다.
     match /questions/{id} {
-      allow read: if isAdmin() || isAuthor();
+      allow read: if isAdmin() || isAuthor()
+        || (verified()
+            && resource.data.isPublic == true
+            && resource.data.status == 'answered');
 
       // 관리자는 답변까지 채워서 바로 등록할 수 있다.
       allow create: if isAdmin()
@@ -49,9 +53,11 @@ service cloud.firestore {
         && request.resource.data.content is string
         && request.resource.data.content.size() <= 5000
         && request.resource.data.answer == ''
+        && request.resource.data.isPublic is bool
         && request.resource.data.status == 'pending');
 
-      // 관리자는 답변을 달 수 있고, 작성자는 답변 전 자기 글만 고칠 수 있다.
+      // 관리자는 답변과 공개 여부를 언제든 바꾼다.
+      // 작성자는 자기 글의 내용과 공개 여부만 고칠 수 있고 답변·상태는 못 건드린다.
       allow update: if isAdmin()
         || (isAuthor()
             && request.resource.data.authorUid == resource.data.authorUid

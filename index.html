@@ -171,7 +171,8 @@
 <div class="modal-overlay" id="postModal">
   <div class="modal">
     <div class="modal-title" id="postModalTitle">질문 작성</div>
-    <div class="private-note">🔒 작성한 질문은 <strong>관리자와 작성자 본인만</strong> 볼 수 있습니다.</div>
+    <div class="private-note">🔒 <strong>비공개</strong>로 두면 나와 조합만 봅니다.<br>
+      <strong>공개</strong>를 고르셔도 조합이 답변을 등록하기 전까지는 나와 조합만 보입니다.</div>
     <div class="form-group">
       <label>카테고리 *</label>
       <select class="form-control" id="pCategory"></select>
@@ -183,6 +184,13 @@
     <div class="form-group">
       <label>질문 내용 *</label>
       <textarea class="form-control" id="pContent" rows="6" placeholder="궁금한 점을 자세히 적어주세요"></textarea>
+    </div>
+    <div class="form-group">
+      <label>공개 여부 *</label>
+      <select class="form-control" id="pPublic">
+        <option value="private">비공개 — 나와 조합만 봅니다</option>
+        <option value="public">공개 — 답변이 등록되면 다른 조합원에게도 공개</option>
+      </select>
     </div>
     <div class="form-group" id="pAuthorGroup" hidden>
       <label>작성자 동·호수 (비우면 조합 등록으로 표시)</label>
