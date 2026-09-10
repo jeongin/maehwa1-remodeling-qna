@@ -52,6 +52,16 @@ export function fmt(ts) {
   return d.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
+/** 날짜 + 시:분. 질문·답변 시각처럼 분 단위가 필요한 곳에 쓴다. */
+export function fmtAt(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleString('ko-KR', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
+}
+
 /** 카테고리 <select> 채우기 */
 export function fillCategorySelect(el, cats) {
   el.innerHTML = cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');

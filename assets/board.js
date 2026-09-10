@@ -1,6 +1,6 @@
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, state, BOARD_CATEGORIES, $, esc, fmt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
+import { db, state, BOARD_CATEGORIES, $, esc, fmtAt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
   from './core.js';
 
 let posts = [], filter = '전체', editId = null, answerId = null;
@@ -72,6 +72,7 @@ async function savePost() {
       if (adm) {
         patch.answer = answer;
         patch.status = answer ? 'answered' : 'pending';
+        if (answer) patch.answeredAt = serverTimestamp();
         patch.authorDong = $('pDong').value.trim();
         patch.authorHo = $('pHo').value.trim();
       }
@@ -83,6 +84,7 @@ async function savePost() {
         authorDong: adm ? $('pDong').value.trim() : state.dong,
         authorHo: adm ? $('pHo').value.trim() : state.ho,
         answer, status: answer ? 'answered' : 'pending',
+        ...(answer ? { answeredAt: serverTimestamp() } : {}),
         createdAt: serverTimestamp(), updatedAt: serverTimestamp()
       });
     }
@@ -129,9 +131,9 @@ function card(p) {
             <span class="qa-tag">${esc(p.category)}</span>
             <span class="status ${live ? 'open' : 'closed'}">${live ? '공개중' : p.isPublic ? '공개(답변 대기)' : '비공개'}</span>
             <span class="status ${answered ? 'answered' : 'pending'}">${answered ? '답변완료' : '답변대기'}</span>
-            ${state.isAdmin ? `<span class="qa-author">${p.authorDong && p.authorHo
-              ? `${esc(p.authorDong)}동 ${esc(p.authorHo)}호` : '조합 등록'}</span>` : ''}
-            <span class="qa-date">${fmt(p.createdAt)}</span>
+            <span class="qa-author">${p.authorDong && p.authorHo
+              ? `${esc(p.authorDong)}동 ${esc(p.authorHo)}호` : '조합 등록'}</span>
+            <span class="qa-date">${fmtAt(p.createdAt)}</span>
           </div>
         </div>
         <div class="qa-chevron">▾</div>
@@ -140,7 +142,8 @@ function card(p) {
         <div class="qa-body">${esc(p.content)}</div>
         <div class="qa-divider"></div>
         ${answered
-          ? `<span class="qa-a-mark">A</span><span class="qa-a-text">${esc(p.answer)}</span>`
+          ? `<span class="qa-a-mark">A</span><span class="qa-a-text">${esc(p.answer)}</span>
+             ${p.answeredAt ? `<div class="qa-stamp">답변 ${fmtAt(p.answeredAt)}</div>` : ''}`
           : `<div class="qa-pending">아직 답변이 등록되지 않았습니다.</div>`}
         <div class="qa-item-actions">
           ${state.isAdmin ? `<button class="btn-sm" data-act="answer">💬 ${answered ? '답변 수정' : '답변 등록'}</button>

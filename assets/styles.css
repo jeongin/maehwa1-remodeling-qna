@@ -93,6 +93,7 @@ main { max-width: 760px; margin: 0 auto; padding: 24px 16px 90px; }
 .qa-body { font-size: 0.9rem; line-height: 1.7; white-space: pre-wrap; word-break: keep-all; margin-bottom: 4px; }
 .qa-divider { border-top: 1px dashed var(--border); margin: 14px 0 12px; }
 .qa-pending { font-size: 0.82rem; color: var(--text-muted); font-style: italic; }
+.qa-stamp { margin-top: 8px; font-size: 0.7rem; color: var(--text-muted); }
 .qa-item-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); flex-wrap: wrap; }
 .btn-sm { font-size: 0.72rem; font-family: 'Noto Sans KR', sans-serif; padding: 4px 10px; border-radius: 5px; border: 1px solid var(--border); cursor: pointer; background: white; color: var(--text-muted); transition: all 0.12s; }
 .btn-sm:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
