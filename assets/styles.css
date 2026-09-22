@@ -169,10 +169,13 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .attach-hint { font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; }
 .attach-status { font-size: 0.74rem; color: var(--text-muted); margin-top: 6px; min-height: 16px; }
 .attach-status.bad { color: #dc2626; }
-.att-inline { display: block; max-width: 340px; margin: 10px 0; }
+/* 본문 중간에 끼워 넣은 이미지. 테두리 없이 원본 비율 그대로 둔다. */
+.att-inline { display: block; text-decoration: none; width: fit-content; max-width: min(100%, 460px); margin: 12px 0; }
+.att-inline img { width: auto; max-width: 100%; height: auto; max-height: 420px; display: block; border-radius: 6px; }
+/* 마커가 없어 답변 끝에 모아 붙는 이미지 */
 .att-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.att { display: block; width: 110px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-.att img { width: 100%; display: block; }
+.att-row .att { display: block; text-decoration: none; width: 110px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.att-row .att img { width: 100%; height: auto; display: block; }
 mark { background: #fff3b0; color: inherit; border-radius: 2px; padding: 0 1px; }
 .spinner-wrap { display: flex; justify-content: center; padding: 48px; }
 .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }

@@ -125,10 +125,10 @@ export function createAttachField({ listId, inputId, pasteId, statusId }) {
   };
 }
 
+// 태그 사이에 공백을 두면 pre-wrap 부모에서 그대로 여백으로 보인다. 붙여 쓴다.
 const thumb = (img, cls) =>
-  `<a class="${cls}" href="${esc(img.url)}" target="_blank" rel="noopener">
-     <img src="${esc(img.url)}" alt="첨부 이미지" loading="lazy">
-   </a>`;
+  `<a class="${cls}" href="${esc(img.url)}" target="_blank" rel="noopener"` +
+  `><img src="${esc(img.url)}" alt="첨부 이미지" loading="lazy"></a>`;
 
 /**
  * 마커가 있는 자리에 이미지를 끼워 본문을 그린다.
@@ -136,9 +136,17 @@ const thumb = (img, cls) =>
  */
 export function renderRichText(text, images = [], q = '') {
   const used = new Set();
-  const body = String(text || '').split(/(\[\[이미지\d+\]\])/g).map(part => {
+  const parts = String(text || '').split(/(\[\[이미지\d+\]\])/g);
+  const isMark = i => /^\[\[이미지\d+\]\]$/.test(parts[i] || '');
+  const body = parts.map((part, i) => {
     const m = part.match(/^\[\[이미지(\d+)\]\]$/);
-    if (!m) return hi(part, q);
+    if (!m) {
+      // 이미지가 블록이라 바로 앞뒤 줄바꿈은 빈 줄로 겹쳐 보인다.
+      let t = part;
+      if (isMark(i - 1)) t = t.replace(/^\n/, '');
+      if (isMark(i + 1)) t = t.replace(/\n$/, '');
+      return hi(t, q);
+    }
     const n = Number(m[1]);
     const img = images[n - 1];
     if (!img) return '';
