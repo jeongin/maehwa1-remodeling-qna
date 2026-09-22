@@ -1,10 +1,13 @@
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { db, state, BOARD_CATEGORIES, $, esc, fmtAt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
+import { db, state, CATEGORIES, $, esc, fmtAt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
   from './core.js';
+import { renderSuggestions, initSuggestions } from './knowledge.js';
 
-let posts = [], filter = '전체', editId = null, answerId = null;
+let posts = [], filter = '전체', editId = null, answerId = null, linkedId = null;
 let unsubs = [], buckets = { all: [], mine: [], open: [] };
+
+const SUG_FOOT = '찾는 답이 없으면 아래에서 질문을 이어서 작성하세요.';
 
 const newest = (a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
 const isMine = p => p.authorUid === state.user?.uid;
@@ -43,7 +46,7 @@ export function openPostModal(id = null) {
   editId = id;
   const p = id ? posts.find(x => x.id === id) : null;
   $('postModalTitle').textContent = id ? '질문 수정' : '질문 작성';
-  $('pCategory').value = p?.category || BOARD_CATEGORIES[0];
+  $('pCategory').value = p?.category || CATEGORIES[0];
   $('pTitle').value = p?.title || '';
   $('pContent').value = p?.content || '';
   $('pPublic').value = p?.isPublic ? 'public' : 'private';
@@ -52,6 +55,7 @@ export function openPostModal(id = null) {
   $('pDong').value = p?.authorDong || '';
   $('pHo').value = p?.authorHo || '';
   $('pAnswer').value = p?.answer || '';
+  renderSuggestions($('pSuggest'), $('pTitle').value, { excludeId: id, foot: SUG_FOOT });
   openModal('postModal');
   setTimeout(() => $('pTitle').focus(), 100);
 }
@@ -95,21 +99,40 @@ async function savePost() {
 
 function openAnswerModal(id) {
   answerId = id;
+  linkedId = null;
   const p = posts.find(x => x.id === id);
   $('answerQuote').textContent = `[${p.category}] ${p.title}\n\n${p.content}`;
   $('aContent').value = p.answer || '';
+  $('aToFaq').checked = false;
+  $('aLinked').hidden = true;
+  renderSuggestions($('aSuggest'), `${p.title} ${p.content}`, {
+    excludeId: id,
+    head: '이미 답변한 비슷한 질문이 있어요',
+    pickLabel: '이 답변 연결',
+    foot: '연결하면 그 답변을 그대로 가져옵니다. 새로 쓰시려면 무시하세요.'
+  });
   openModal('answerModal');
   setTimeout(() => $('aContent').focus(), 100);
 }
 
 async function saveAnswer() {
   const answer = $('aContent').value.trim();
+  const p = posts.find(x => x.id === answerId);
   const btn = $('answerSaveBtn');
   btn.disabled = true;
   try {
     await updateDoc(doc(db, 'questions', answerId), {
-      answer, status: answer ? 'answered' : 'pending', answeredAt: serverTimestamp()
+      answer, status: answer ? 'answered' : 'pending',
+      answeredAt: serverTimestamp(),
+      ...(linkedId ? { linkedId } : {})
     });
+    // 같은 내용을 FAQ 에도 쌓아두면 다음 사람이 검색으로 먼저 찾는다.
+    if (answer && $('aToFaq').checked) {
+      await addDoc(collection(db, 'qa_items'), {
+        category: p.category, question: p.title, answer,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+      });
+    }
     closeModal('answerModal');
   } catch (e) { alert('저장 오류: ' + e.message); }
   btn.disabled = false;
@@ -157,7 +180,7 @@ function card(p) {
 }
 
 function render() {
-  renderChips($('boardFilters'), BOARD_CATEGORIES, filter);
+  renderChips($('boardFilters'), CATEGORIES, filter);
   $('boardNotice').innerHTML = state.isAdmin
     ? '🔑 <strong>관리자 화면</strong> — 모든 질문이 보입니다. 공개로 설정된 질문은 <strong>답변을 등록하는 순간</strong> 다른 조합원에게도 공개됩니다.'
     : '🔒 질문은 기본적으로 <strong>나와 조합만</strong> 봅니다. <strong>공개</strong>로 올리면 조합이 답변을 등록한 뒤 다른 조합원도 질문과 답변을 볼 수 있습니다.';
@@ -180,7 +203,21 @@ function render() {
 }
 
 export function initBoard() {
-  fillCategorySelect($('pCategory'), BOARD_CATEGORIES);
+  fillCategorySelect($('pCategory'), CATEGORIES);
+  initSuggestions($('pSuggest'));
+  initSuggestions($('aSuggest'), hit => {
+    $('aContent').value = hit.answer;
+    linkedId = hit.id;
+    $('aToFaq').checked = false;
+    $('aLinked').hidden = false;
+    $('aLinked').textContent = `🔗 기존 답변을 연결했습니다 — ${hit.question}`;
+  });
+  let timer = null;
+  $('pTitle').addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => renderSuggestions($('pSuggest'), $('pTitle').value,
+      { excludeId: editId, foot: SUG_FOOT }), 250);
+  });
   $('postSaveBtn').addEventListener('click', savePost);
   $('answerSaveBtn').addEventListener('click', saveAnswer);
   $('boardFilters').addEventListener('click', e => {

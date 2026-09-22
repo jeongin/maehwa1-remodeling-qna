@@ -89,7 +89,7 @@
     </div>
   </div>
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="faq">자주 묻는 질문</button>
+    <button class="tab active" data-tab="faq">기존 질문/답변 찾기</button>
     <button class="tab" data-tab="board">질문 등록하기</button>
     <button class="tab" id="tab-admin" data-tab="admin" hidden>조합원 관리</button>
   </div>
@@ -97,9 +97,11 @@
 
 <!-- ── 자주 묻는 질문 ── -->
 <main id="panel-faq">
+  <div class="notice">🔎 <strong>질문하기 전에 여기서 먼저 찾아보세요.</strong>
+    조합이 정리한 자주 묻는 질문과, 답변이 끝난 공개 질문을 함께 검색합니다.</div>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" id="searchInput" placeholder="질문이나 답변 내용으로 검색...">
+    <input type="text" id="searchInput" placeholder="궁금한 내용을 검색해보세요">
   </div>
   <div class="filter-row" id="faqFilters"></div>
   <div class="stats-bar" id="faqStats"></div>
@@ -181,6 +183,7 @@
       <label>제목 *</label>
       <input type="text" class="form-control" id="pTitle" maxlength="80" placeholder="질문을 한 줄로 요약해주세요">
     </div>
+    <div class="suggest" id="pSuggest" hidden></div>
     <div class="form-group">
       <label>질문 내용 *</label>
       <textarea class="form-control" id="pContent" rows="6" placeholder="궁금한 점을 자세히 적어주세요"></textarea>
@@ -215,10 +218,16 @@
   <div class="modal">
     <div class="modal-title">답변 등록</div>
     <div class="answer-quote" id="answerQuote"></div>
+    <div class="suggest" id="aSuggest" hidden></div>
+    <div class="linked-note" id="aLinked" hidden></div>
     <div class="form-group">
       <label>답변 내용</label>
       <textarea class="form-control" id="aContent" rows="6" placeholder="답변을 입력하세요"></textarea>
     </div>
+    <label class="check-row">
+      <input type="checkbox" id="aToFaq">
+      <span>이 답변을 <strong>자주 묻는 질문</strong>에도 등록</span>
+    </label>
     <div class="form-actions">
       <button class="btn-cancel" data-close="answerModal">취소</button>
       <button class="btn-primary" id="answerSaveBtn">답변 저장</button>

@@ -9,7 +9,8 @@ index.html            화면 마크업
 assets/styles.css     스타일
 assets/core.js        Firebase 초기화 · 공용 상수/헬퍼
 assets/auth.js        로그인 게이트 (동호수 + 휴대폰 뒷자리, 관리자 이메일)
-assets/faq.js         자주 묻는 질문 탭
+assets/faq.js         기존 질문/답변 찾기 탭
+assets/knowledge.js   FAQ+공개 Q&A 통합 검색 · 유사 질문 탐색
 assets/board.js       질문 등록하기 탭
 assets/admin.js       조합원 관리 탭 (관리자 전용)
 assets/app.js         탭 전환 · 모달 · 부트스트랩
@@ -95,13 +96,22 @@ node tools/import-residents.js residents.csv
 
 ### 카테고리
 
-FAQ와 게시판은 분류 체계가 다릅니다. `assets/core.js` 에 정의돼 있습니다.
+FAQ와 게시판이 같은 목록을 씁니다. `assets/core.js` 의 `CATEGORIES` —
+법무·세무·회계 / 설계 / 이주·이주비 / 총회 / 주민설명회 / 기타.
+바꿀 때는 `firestore.rules` 의 `create` 조건에 있는 목록도 함께 고쳐야 합니다.
 
-- `FAQ_CATEGORIES` — 총회 / 주민설명회
-- `BOARD_CATEGORIES` — 법무·세무·회계 / 설계 / 이주·이주비 / 총회 / 주민설명회 / 기타
+### 중복 질문 줄이기
 
-게시판 카테고리를 바꿀 때는 `firestore.rules` 의 `create` 조건에 있는 목록도
-함께 고쳐야 합니다. FAQ 카테고리는 규칙에서 검사하지 않습니다.
+첫 탭 **기존 질문/답변 찾기** 는 `qa_items` 와 답변이 끝난 공개 `questions`
+를 한 목록으로 묶어 검색합니다 (`assets/knowledge.js`).
+
+질문 제목을 입력하면 비슷한 질문이 최대 3건 떠오릅니다. 형태소 분석 없이
+두 글자 묶음 겹침과 낱말 포함을 함께 보고, "어떻게 / 하나요" 같은 질문
+어미는 걸러서 엉뚱한 글이 걸리지 않게 합니다.
+
+관리자는 답변 모달에서 비슷한 기존 답변을 **이 답변 연결** 로 그대로
+가져올 수 있고(`linkedId` 로 흔적을 남깁니다), **자주 묻는 질문에도 등록**
+을 체크하면 같은 내용이 `qa_items` 로도 쌓입니다.
 
 | 컬렉션 | 용도 | 읽기 권한 |
 |---|---|---|

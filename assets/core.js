@@ -24,11 +24,11 @@ export const RESIDENT_DOMAIN = 'resident.maehwa1.kr';
  */
 export const PW_PREFIX = 'mh1!';
 
-/** 질문 게시판 카테고리 (firestore.rules 의 목록과 반드시 일치해야 함) */
-export const BOARD_CATEGORIES = ['법무·세무·회계', '설계', '이주·이주비', '총회', '주민설명회', '기타'];
-
-/** 자주 묻는 질문 카테고리. 게시판과 분류 체계가 다르다. */
-export const FAQ_CATEGORIES = ['총회', '주민설명회'];
+/**
+ * 질문 게시판과 FAQ 가 함께 쓰는 카테고리.
+ * firestore.rules 의 create 검증 목록과 반드시 일치해야 한다.
+ */
+export const CATEGORIES = ['법무·세무·회계', '설계', '이주·이주비', '총회', '주민설명회', '기타'];
 
 /** 화면 전체가 공유하는 상태 */
 export const state = { user: null, isAdmin: false, dong: '', ho: '', tab: 'faq' };
