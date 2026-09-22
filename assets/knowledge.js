@@ -86,18 +86,34 @@ function wordScore(input, target) {
 
 const score = (input, target) => Math.max(gramScore(input, target), wordScore(input, target));
 
+/** 한 낱말 검색: 그대로 들어 있는지만 본다. */
+function keywordHit(k, word) {
+  if ((k.question || '').includes(word)) return 1;
+  if ((k.detail || '').includes(word)) return 0.8;
+  if ((k.answer || '').includes(word)) return 0.7;
+  if ((k.category || '').includes(word)) return 0.6;
+  return 0;
+}
+
 export function findSimilar(text, limit = 3, excludeId = null) {
-  if (String(text || '').replace(/\s/g, '').length < 4) return [];
+  const raw = String(text || '').trim();
+  const compact = raw.replace(/\s/g, '');
+  if (compact.length < 2) return [];
+
+  // 띄어쓰기 없는 짧은 말은 유사도 대신 포함 여부로 찾는다.
+  // 두세 글자는 묶음 겹침 비율이 널뛰어 엉뚱한 글이 걸리거나 아무것도 안 걸린다.
+  const asKeyword = compact.length <= 6 && !/\s/.test(raw);
+
   return knowledge()
     .filter(k => k.id !== excludeId)
     .map(k => ({
       k,
-      score: Math.max(
+      score: asKeyword ? keywordHit(k, compact) : Math.max(
         score(text, k.question),
         score(text, k.detail) * 0.8,
         score(text, k.answer) * 0.7)
     }))
-    .filter(x => x.score >= 0.28)
+    .filter(x => x.score >= (asKeyword ? 0.5 : 0.28))
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
     .map(x => x.k);
