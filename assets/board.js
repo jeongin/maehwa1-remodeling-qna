@@ -4,8 +4,12 @@ import { db, state, CATEGORIES, $, esc, fmtAt, fillCategorySelect, renderChips, 
   from './core.js';
 import { renderSuggestions, initSuggestions } from './knowledge.js';
 
-let posts = [], filter = '전체', editId = null, answerId = null, linkedId = null;
+let posts = [], filter = '전체', statusFilter = '전체';
+let editId = null, answerId = null, linkedId = null;
 let unsubs = [], buckets = { all: [], mine: [] };
+
+/** 관리자 전용 답변 상태 필터 */
+const STATUS_TABS = ['답변대기', '답변완료'];
 
 const SUG_FOOT = '찾는 답이 없으면 아래에서 질문을 이어서 작성하세요.';
 
@@ -182,7 +186,13 @@ function render() {
     ? '🔑 <strong>관리자 화면</strong> — 모든 질문이 보입니다. 공개로 설정된 질문은 <strong>답변을 등록하는 순간</strong> 다른 조합원에게도 공개됩니다.'
     : '🔒 여기에는 <strong>내가 올린 질문만</strong> 보입니다. <strong>공개</strong>로 올린 질문은 조합이 답변을 등록한 뒤 <strong>기존 질문/답변 찾기</strong> 탭에서 다른 조합원도 보게 됩니다.';
 
-  const list = filter === '전체' ? posts : posts.filter(p => p.category === filter);
+  $('boardStatus').hidden = !state.isAdmin;
+  if (state.isAdmin) renderChips($('boardStatus'), STATUS_TABS, statusFilter);
+
+  let list = posts;
+  if (statusFilter === '답변대기') list = list.filter(p => !p.answer);
+  if (statusFilter === '답변완료') list = list.filter(p => p.answer);
+  if (filter !== '전체') list = list.filter(p => p.category === filter);
   if (state.isAdmin) {
     const pending = posts.filter(p => !p.answer).length;
     $('boardStats').textContent = `전체 ${posts.length}건 · 답변대기 ${pending}건 · 표시 ${list.length}건`;
@@ -218,6 +228,10 @@ export function initBoard() {
   $('boardFilters').addEventListener('click', e => {
     const chip = e.target.closest('.chip');
     if (chip) { filter = chip.dataset.cat; render(); }
+  });
+  $('boardStatus').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (chip) { statusFilter = chip.dataset.cat; render(); }
   });
   $('boardList').addEventListener('click', async e => {
     const target = e.target.closest('[data-act]');
