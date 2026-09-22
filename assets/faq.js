@@ -2,7 +2,7 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { db, state, CATEGORIES, $, esc, hi, fmtAt, fillCategorySelect, renderChips,
          openModal, closeModal, emptyState } from './core.js';
-import { knowledge, subscribeKnowledge, onKnowledge } from './knowledge.js';
+import { knowledge, subscribeKnowledge, onKnowledge, keywordScore } from './knowledge.js';
 import { renderRichText } from './attach.js';
 
 let filter = '전체', editId = null;
@@ -82,11 +82,13 @@ function render() {
 
   let list = items;
   if (filter !== '전체') list = list.filter(i => i.category === filter);
-  if (q) list = list.filter(i =>
-    (i.question || '').toLowerCase().includes(q) ||
-    (i.detail || '').toLowerCase().includes(q) ||
-    (i.answer || '').toLowerCase().includes(q) ||
-    (i.category || '').toLowerCase().includes(q));
+  // 제목 > 본문 > 카테고리 > 답변 순으로 올리고, 같은 순위면 최신 답변부터.
+  if (q) list = list
+    .map(i => ({ i, s: keywordScore(i, q) }))
+    .filter(x => x.s > 0)
+    .sort((a, b) => b.s - a.s ||
+      ((b.i.answeredAt || b.i.at)?.seconds || 0) - ((a.i.answeredAt || a.i.at)?.seconds || 0))
+    .map(x => x.i);
 
   const faqCount = items.filter(i => i.source === 'faq').length;
   $('faqStats').textContent =

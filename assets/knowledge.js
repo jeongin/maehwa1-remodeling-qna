@@ -86,13 +86,38 @@ function wordScore(input, target) {
 
 const score = (input, target) => Math.max(gramScore(input, target), wordScore(input, target));
 
-/** 한 낱말 검색: 그대로 들어 있는지만 본다. */
-function keywordHit(k, word) {
-  if ((k.question || '').includes(word)) return 1;
-  if ((k.detail || '').includes(word)) return 0.8;
-  if ((k.answer || '').includes(word)) return 0.7;
-  if ((k.category || '').includes(word)) return 0.6;
+/**
+ * 검색 매칭 우선순위. 위에 있을수록 먼저 보여준다.
+ * 답변은 목록에서 빠지지 않도록 남겨두되 가장 낮게 둔다.
+ */
+const FIELDS = [
+  ['question', 1],
+  ['detail', 0.8],
+  ['category', 0.6],
+  ['answer', 0.4]
+];
+
+/** 낱말이 그대로 들어 있는 칸 중 가장 높은 순위를 점수로 준다. 0 이면 안 걸린 것. */
+export function keywordScore(k, word) {
+  const w = String(word || '').toLowerCase();
+  if (!w) return 0;
+  for (const [field, weight] of FIELDS) {
+    if (String(k[field] || '').toLowerCase().includes(w)) return weight;
+  }
   return 0;
+}
+
+/**
+ * 문장 유사도. 칸마다 따로 재서 기준을 넘긴 것에만 우선순위 가중치를 곱한다.
+ * "걸리는가"(기준)와 "얼마나 위에 오는가"(가중치)를 분리한다.
+ */
+function fuzzyScore(k, text) {
+  let best = 0;
+  for (const [field, weight] of FIELDS) {
+    const raw = score(text, k[field]);
+    if (raw >= 0.28) best = Math.max(best, weight * raw);
+  }
+  return best;
 }
 
 export function findSimilar(text, limit = 3, excludeId = null) {
@@ -106,14 +131,8 @@ export function findSimilar(text, limit = 3, excludeId = null) {
 
   return knowledge()
     .filter(k => k.id !== excludeId)
-    .map(k => ({
-      k,
-      score: asKeyword ? keywordHit(k, compact) : Math.max(
-        score(text, k.question),
-        score(text, k.detail) * 0.8,
-        score(text, k.answer) * 0.7)
-    }))
-    .filter(x => x.score >= (asKeyword ? 0.5 : 0.28))
+    .map(k => ({ k, score: asKeyword ? keywordScore(k, compact) : fuzzyScore(k, raw) }))
+    .filter(x => x.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
     .map(x => x.k);
