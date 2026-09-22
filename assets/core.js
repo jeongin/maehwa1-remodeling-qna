@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 export const firebaseConfig = {
@@ -12,7 +13,24 @@ export const firebaseConfig = {
 };
 
 export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+
+/**
+ * 영구 캐시를 켠다. 다시 들어왔을 때 이전에 받아둔 문서는 캐시에서 꺼내고
+ * 서버에서는 그 사이 바뀐 것만 받는다. 읽기 횟수가 줄고 첫 화면도 빨리 뜬다.
+ * 시크릿 모드처럼 IndexedDB 를 못 쓰는 환경에서는 조용히 메모리 캐시로 돌아간다.
+ */
+function makeDb() {
+  try {
+    return initializeFirestore(app, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
+  } catch (e) {
+    console.warn('영구 캐시를 쓸 수 없어 메모리 캐시로 동작합니다:', e.code || e.message);
+    return getFirestore(app);
+  }
+}
+
+export const db = makeDb();
 export const auth = getAuth(app);
 
 /** 조합원 계정을 만들 때 쓰는 내부 도메인. 실제로 메일이 오가지 않습니다. */
