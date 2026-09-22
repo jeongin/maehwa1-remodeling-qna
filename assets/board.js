@@ -1,11 +1,13 @@
-import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
+import { collection, query, where, orderBy, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { db, state, CATEGORIES, $, esc, fmtAt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
   from './core.js';
 import { renderSuggestions, initSuggestions } from './knowledge.js';
+import { createAttachField, renderRichText } from './attach.js';
 
 let posts = [], filter = '전체', statusFilter = '전체';
-let editId = null, answerId = null, linkedId = null;
+let editId = null, answerId = null, linkedId = null, draftId = null;
+let answerAttach = null;
 let unsubs = [], buckets = { all: [], mine: [] };
 
 /** 관리자 전용 답변 상태 필터 */
@@ -57,6 +59,7 @@ export function openPostModal(id = null) {
   $('pHo').value = p?.authorHo || '';
   $('pAnswer').value = p?.answer || '';
   renderSuggestions($('pSuggest'), $('pTitle').value, { excludeId: id, foot: SUG_FOOT });
+  draftId = id || doc(collection(db, 'questions')).id;
   openModal('postModal');
   setTimeout(() => $('pTitle').focus(), 100);
 }
@@ -83,7 +86,7 @@ async function savePost() {
       }
       await updateDoc(doc(db, 'questions', editId), patch);
     } else {
-      await addDoc(collection(db, 'questions'), {
+      await setDoc(doc(db, 'questions', draftId), {
         category, title, content, isPublic,
         authorUid: state.user.uid,
         authorDong: adm ? $('pDong').value.trim() : state.dong,
@@ -106,6 +109,7 @@ function openAnswerModal(id) {
   $('aContent').value = p.answer || '';
   $('aToFaq').checked = false;
   $('aLinked').hidden = true;
+  answerAttach.reset(p.answerImages, id);
   renderSuggestions($('aSuggest'), `${p.title} ${p.content}`, {
     excludeId: id,
     head: '이미 답변한 비슷한 질문이 있어요',
@@ -124,6 +128,7 @@ async function saveAnswer() {
   try {
     await updateDoc(doc(db, 'questions', answerId), {
       answer, status: answer ? 'answered' : 'pending',
+      answerImages: answerAttach.items(),
       answeredAt: serverTimestamp(),
       ...(linkedId ? { linkedId } : {})
     });
@@ -166,7 +171,7 @@ function card(p) {
         <div class="qa-body">${esc(p.content)}</div>
         <div class="qa-divider"></div>
         ${answered
-          ? `<span class="qa-a-mark">A</span><span class="qa-a-text">${esc(p.answer)}</span>
+          ? `<span class="qa-a-mark">A</span><span class="qa-a-text">${renderRichText(p.answer, p.answerImages)}</span>
              ${p.answeredAt ? `<div class="qa-stamp">답변 ${fmtAt(p.answeredAt)}</div>` : ''}`
           : `<div class="qa-pending">아직 답변이 등록되지 않았습니다.</div>`}
         <div class="qa-item-actions">
@@ -209,6 +214,7 @@ function render() {
 
 export function initBoard() {
   fillCategorySelect($('pCategory'), CATEGORIES);
+  answerAttach = createAttachField({ listId: 'aThumbs', inputId: 'aFile', pasteId: 'aContent', statusId: 'aAttachStatus' });
   initSuggestions($('pSuggest'));
   initSuggestions($('aSuggest'), hit => {
     $('aContent').value = hit.answer;

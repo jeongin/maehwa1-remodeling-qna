@@ -11,6 +11,8 @@ assets/core.js        Firebase 초기화 · 공용 상수/헬퍼
 assets/auth.js        로그인 게이트 (동호수 + 휴대폰 뒷자리, 관리자 이메일)
 assets/faq.js         기존 질문/답변 찾기 탭
 assets/knowledge.js   FAQ+공개 Q&A 통합 검색 · 유사 질문 탐색
+assets/image.js       붙여넣은 이미지 축소 · 재인코딩
+assets/attach.js      Storage 업로드 · 인라인 마커 렌더
 assets/board.js       질문 등록하기 탭
 assets/admin.js       조합원 관리 탭 (관리자 전용)
 assets/app.js         탭 전환 · 모달 · 부트스트랩
@@ -92,6 +94,24 @@ node tools/import-residents.js residents.csv
 > 서비스 계정 키와 조합원 CSV 는 절대 저장소에 넣지 마세요. `.gitignore`
 > 에 등록해 두었습니다.
 
+## 답변 이미지 첨부
+
+관리자가 답변을 쓸 때만 이미지를 붙일 수 있습니다(질문에는 첨부 불가).
+답변 칸에 붙여넣거나 끌어다 놓으면 커서 자리에 `[[이미지1]]` 마커가 들어가고,
+화면에는 그 자리에 이미지가 그려집니다. 마커가 없는 이미지는 답변 끝에
+모아 붙어 어떤 경우에도 빠지지 않습니다.
+
+`assets/image.js` 가 캔버스로 다시 그려 **긴 변 1600px, 1MB 이하 JPEG** 로
+줄입니다. 4000x3000 8MB 사진이 약 80KB 로 0.1초 안에 처리됩니다. 재인코딩
+과정에서 원본 메타데이터와 이상한 페이로드가 함께 사라집니다.
+
+### Storage 준비 (필수)
+
+무료 Spark 플랜에서는 Storage 버킷을 만들 수 없습니다. **Blaze 플랜으로
+전환**한 뒤 콘솔에서 Storage 를 시작하고 `storage.rules` 를 게시해야
+첨부가 동작합니다. 전환 직후 Google Cloud 콘솔에서 **예산 알림**을 먼저
+걸어두세요.
+
 ## 데이터 모델
 
 ### 카테고리
@@ -119,6 +139,7 @@ FAQ와 게시판이 같은 목록을 씁니다. `assets/core.js` 의 `CATEGORIES
 |---|---|---|
 | `qa_items` | 자주 묻는 질문 | 로그인한 모든 조합원 |
 | `questions` | 질문 등록하기 | **작성자 본인 + 관리자**, 공개+답변완료면 전체 |
+| Storage `attachments/{질문id}/` | 답변 첨부 이미지 | 로그인한 조합원 |
 | `users` | 동·호수 명부 | 본인 + 관리자 |
 | `config/admins` | 관리자 이메일 목록 | 로그인한 모든 조합원 |
 

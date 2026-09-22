@@ -3,6 +3,7 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
 import { db, state, CATEGORIES, $, esc, hi, fmtAt, fillCategorySelect, renderChips,
          openModal, closeModal, emptyState } from './core.js';
 import { knowledge, subscribeKnowledge, onKnowledge } from './knowledge.js';
+import { renderRichText } from './attach.js';
 
 let filter = '전체', editId = null;
 
@@ -56,14 +57,15 @@ function card(i, q) {
             ${i.category ? `<span class="qa-tag">${hi(i.category, q)}</span>` : ''}
             <span class="status ${fromFaq ? 'answered' : 'open'}">${fromFaq ? '자주 묻는 질문' : '조합원 질문'}</span>
             ${i.who ? `<span class="qa-author">${esc(i.who)}</span>` : ''}
-            <span class="qa-date">${fmtAt(i.at)}</span>
+            <span class="qa-date">${fromFaq ? '' : '질문 '}${fmtAt(i.at)}</span>
           </div>
         </div>
         <div class="qa-chevron">▾</div>
       </div>
       <div class="qa-answer">
         ${i.detail ? `<div class="qa-body">${hi(i.detail, q)}</div><div class="qa-divider"></div>` : ''}
-        <span class="qa-a-mark">A</span><span class="qa-a-text">${hi(i.answer, q)}</span>
+        <span class="qa-a-mark">A</span><span class="qa-a-text">${renderRichText(i.answer, i.images, q)}</span>
+        ${i.answeredAt ? `<div class="qa-stamp">답변 ${fmtAt(i.answeredAt)}</div>` : ''}
         ${state.isAdmin && fromFaq ? `<div class="qa-item-actions">
           <button class="btn-sm" data-act="edit">✏ 수정</button>
           <button class="btn-sm danger" data-act="delete">🗑 삭제</button>

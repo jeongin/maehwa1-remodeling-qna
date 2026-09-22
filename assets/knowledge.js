@@ -12,15 +12,17 @@ export function knowledge() {
   return [
     ...faqItems.map(i => ({
       id: i.id, source: 'faq', category: i.category,
-      question: i.question, detail: '', answer: i.answer, at: i.createdAt
+      question: i.question, detail: '', answer: i.answer,
+      // 조합이 직접 쓴 항목이라 작성 시각이 곧 답변 시각이다.
+      at: i.createdAt, answeredAt: i.updatedAt || i.createdAt
     })),
     ...pubItems.map(p => ({
       id: p.id, source: 'board', category: p.category,
       question: p.title, detail: p.content, answer: p.answer,
       who: p.authorDong && p.authorHo ? `${p.authorDong}동 ${p.authorHo}호` : '',
-      at: p.answeredAt || p.createdAt
+      images: p.answerImages, at: p.createdAt, answeredAt: p.answeredAt
     }))
-  ].sort((a, b) => (b.at?.seconds || 0) - (a.at?.seconds || 0));
+  ].sort((a, b) => ((b.answeredAt || b.at)?.seconds || 0) - ((a.answeredAt || a.at)?.seconds || 0));
 }
 
 export function subscribeKnowledge(onSync) {

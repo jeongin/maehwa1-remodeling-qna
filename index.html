@@ -225,6 +225,19 @@
       <label>답변 내용</label>
       <textarea class="form-control" id="aContent" rows="6" placeholder="답변을 입력하세요"></textarea>
     </div>
+    <div class="form-group">
+      <label>이미지 첨부 (선택)</label>
+      <div class="attach">
+        <div class="thumbs" id="aThumbs"></div>
+        <div class="attach-bar">
+          <label class="btn-sm attach-pick">이미지 선택
+            <input type="file" id="aFile" accept="image/*" multiple hidden>
+          </label>
+          <span class="attach-hint">답변 칸의 원하는 위치에 붙여넣으면 그 자리에 들어갑니다. 최대 5장.</span>
+        </div>
+        <div class="attach-status" id="aAttachStatus"></div>
+      </div>
+    </div>
     <label class="check-row">
       <input type="checkbox" id="aToFaq">
       <span>이 답변을 <strong>자주 묻는 질문</strong>에도 등록</span>

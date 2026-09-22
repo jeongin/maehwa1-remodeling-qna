@@ -158,6 +158,21 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .check-row { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text); text-transform: none; letter-spacing: 0; font-weight: 400; margin: 0; }
 .check-row input { width: 16px; height: 16px; flex-shrink: 0; }
 @media (max-width: 500px) { .sug-btns { flex-direction: row; } .sug-row { flex-wrap: wrap; } }
+.attach { border: 1.5px dashed var(--border); border-radius: 8px; padding: 10px; }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.thumbs:not(:empty) { margin-bottom: 10px; }
+.thumb { position: relative; width: 74px; height: 74px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb-x { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border: none; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem; line-height: 1; cursor: pointer; }
+.attach-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.attach-pick { display: inline-block; background: white; }
+.attach-hint { font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; }
+.attach-status { font-size: 0.74rem; color: var(--text-muted); margin-top: 6px; min-height: 16px; }
+.attach-status.bad { color: #dc2626; }
+.att-inline { display: block; max-width: 340px; margin: 10px 0; }
+.att-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.att { display: block; width: 110px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.att img { width: 100%; display: block; }
 mark { background: #fff3b0; color: inherit; border-radius: 2px; padding: 0 1px; }
 .spinner-wrap { display: flex; justify-content: center; padding: 48px; }
 .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
