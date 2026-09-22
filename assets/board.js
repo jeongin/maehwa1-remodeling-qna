@@ -5,7 +5,7 @@ import { db, state, CATEGORIES, $, esc, fmtAt, fillCategorySelect, renderChips, 
 import { renderSuggestions, initSuggestions } from './knowledge.js';
 
 let posts = [], filter = '전체', editId = null, answerId = null, linkedId = null;
-let unsubs = [], buckets = { all: [], mine: [], open: [] };
+let unsubs = [], buckets = { all: [], mine: [] };
 
 const SUG_FOOT = '찾는 답이 없으면 아래에서 질문을 이어서 작성하세요.';
 
@@ -15,7 +15,7 @@ const isMine = p => p.authorUid === state.user?.uid;
 function merge(key, snap) {
   buckets[key] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   const seen = new Map();
-  for (const p of [...buckets.all, ...buckets.mine, ...buckets.open]) seen.set(p.id, p);
+  for (const p of [...buckets.all, ...buckets.mine]) seen.set(p.id, p);
   posts = [...seen.values()].sort(newest);
   render();
 }
@@ -23,7 +23,7 @@ function merge(key, snap) {
 export function subscribeBoard() {
   unsubs.forEach(u => u());
   unsubs = [];
-  posts = []; buckets = { all: [], mine: [], open: [] };
+  posts = []; buckets = { all: [], mine: [] };
   if (!state.user) { render(); return; }
 
   const col = collection(db, 'questions');
@@ -34,11 +34,8 @@ export function subscribeBoard() {
   if (state.isAdmin) {
     unsubs.push(onSnapshot(query(col, orderBy('createdAt', 'desc')), s => merge('all', s), onErr));
   } else {
-    // 규칙이 조회 범위를 강제한다. 내 질문과, 답변이 달린 공개 질문을 따로 구독해 합친다.
+    // 이 탭은 내가 올린 질문만 본다. 공개된 남의 Q&A 는 찾기 탭에서 검색한다.
     unsubs.push(onSnapshot(query(col, where('authorUid', '==', state.user.uid)), s => merge('mine', s), onErr));
-    unsubs.push(onSnapshot(
-      query(col, where('isPublic', '==', true), where('status', '==', 'answered')),
-      s => merge('open', s), onErr));
   }
 }
 
@@ -183,23 +180,21 @@ function render() {
   renderChips($('boardFilters'), CATEGORIES, filter);
   $('boardNotice').innerHTML = state.isAdmin
     ? '🔑 <strong>관리자 화면</strong> — 모든 질문이 보입니다. 공개로 설정된 질문은 <strong>답변을 등록하는 순간</strong> 다른 조합원에게도 공개됩니다.'
-    : '🔒 질문은 기본적으로 <strong>나와 조합만</strong> 봅니다. <strong>공개</strong>로 올리면 조합이 답변을 등록한 뒤 다른 조합원도 질문과 답변을 볼 수 있습니다.';
+    : '🔒 여기에는 <strong>내가 올린 질문만</strong> 보입니다. <strong>공개</strong>로 올린 질문은 조합이 답변을 등록한 뒤 <strong>기존 질문/답변 찾기</strong> 탭에서 다른 조합원도 보게 됩니다.';
 
   const list = filter === '전체' ? posts : posts.filter(p => p.category === filter);
   if (state.isAdmin) {
     const pending = posts.filter(p => !p.answer).length;
     $('boardStats').textContent = `전체 ${posts.length}건 · 답변대기 ${pending}건 · 표시 ${list.length}건`;
   } else {
-    const mineCount = posts.filter(isMine).length;
-    $('boardStats').textContent =
-      `내 질문 ${mineCount}건 · 공개 Q&A ${posts.length - mineCount}건 · 표시 ${list.length}건`;
+    $('boardStats').textContent = `내 질문 ${posts.length}건 · 표시 ${list.length}건`;
   }
 
   $('boardList').innerHTML = list.length
     ? list.map(card).join('')
     : emptyState('✍️', state.isAdmin
       ? '아직 접수된 질문이 없습니다.'
-      : '아직 등록된 질문이 없습니다.<br>오른쪽 아래 ＋ 버튼으로 질문을 남겨주세요.');
+      : '아직 등록하신 질문이 없습니다.<br>오른쪽 아래 ＋ 버튼으로 질문을 남겨주세요.');
 }
 
 export function initBoard() {
