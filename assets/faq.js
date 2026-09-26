@@ -4,6 +4,7 @@ import { db, state, CATEGORIES, $, esc, hi, fmtAt, fillCategorySelect, renderChi
          openModal, closeModal, emptyState } from './core.js';
 import { knowledge, subscribeKnowledge, onKnowledge, keywordScore } from './knowledge.js';
 import { renderRichText } from './attach.js';
+import { openAnswerModal } from './board.js';
 
 let filter = '전체', scope = '전체', editId = null;
 
@@ -72,7 +73,8 @@ function card(i, q) {
         ${state.isAdmin ? `<div class="qa-item-actions">
           ${fromFaq ? `<button class="btn-sm" data-act="edit">✏ 수정</button>
           <button class="btn-sm danger" data-act="delete">🗑 삭제</button>`
-          : `<button class="btn-sm" data-act="faq">${i.isFaq ? '☆ 자주 묻는 질문 해제' : '⭐ 자주 묻는 질문으로'}</button>`}
+          : `<button class="btn-sm" data-act="answer">💬 답변 수정</button>
+          <button class="btn-sm" data-act="faq">${i.isFaq ? '☆ 자주 묻는 질문 해제' : '⭐ 자주 묻는 질문으로'}</button>`}
         </div>` : ''}
       </div>
     </div>`;
@@ -127,6 +129,7 @@ export function initFaq() {
     const id = card.dataset.id;
     if (target.dataset.act === 'toggle') card.classList.toggle('open');
     if (target.dataset.act === 'edit') openFaqModal(id);
+    if (target.dataset.act === 'answer') openAnswerModal(id);
     if (target.dataset.act === 'faq') {
       const item = knowledge().find(x => x.id === id);
       try { await updateDoc(doc(db, 'questions', id), { isFaq: !item.isFaq, updatedAt: serverTimestamp() }); }

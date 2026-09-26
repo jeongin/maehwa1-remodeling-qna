@@ -101,10 +101,11 @@ async function savePost() {
   btn.disabled = false;
 }
 
-function openAnswerModal(id) {
+export function openAnswerModal(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) { alert('질문을 찾지 못했습니다. 잠시 후 다시 시도해주세요.'); return; }
   answerId = id;
   linkedId = null;
-  const p = posts.find(x => x.id === id);
   $('answerQuote').textContent = `[${p.category}] ${p.title}\n\n${p.content}`;
   $('aContent').value = p.answer || '';
   $('aToFaq').checked = !!p.isFaq;
