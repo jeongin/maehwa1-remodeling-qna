@@ -2,7 +2,7 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { db, state, CATEGORIES, $, esc, hi, fmtAt, fillCategorySelect, renderChips,
          openModal, closeModal, emptyState } from './core.js';
-import { knowledge, subscribeKnowledge, onKnowledge, keywordScore } from './knowledge.js';
+import { knowledge, subscribeKnowledge, onKnowledge, keywordScore, isFaqItem } from './knowledge.js';
 import { renderRichText } from './attach.js';
 import { openAnswerModal } from './board.js';
 
@@ -94,7 +94,7 @@ function render() {
   if (q) list = list
     .map(i => ({ i, s: keywordScore(i, q) }))
     .filter(x => x.s > 0)
-    .sort((a, b) => b.s - a.s ||
+    .sort((a, b) => b.s - a.s || (isFaqItem(b.i) - isFaqItem(a.i)) ||
       ((b.i.answeredAt || b.i.at)?.seconds || 0) - ((a.i.answeredAt || a.i.at)?.seconds || 0))
     .map(x => x.i);
 

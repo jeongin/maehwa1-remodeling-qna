@@ -180,6 +180,8 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .notice-head { text-align: center; margin-bottom: 18px; }
 .notice-head h2 { font-family: 'Noto Serif KR', serif; font-size: 1.3rem; color: var(--accent); line-height: 1.4; word-break: keep-all; }
 .notice-head p { font-size: 0.82rem; color: var(--text-muted); margin-top: 8px; line-height: 1.6; word-break: keep-all; }
+.map-link { display: inline-block; margin-top: 10px; padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--accent); font-size: 0.8rem; font-weight: 500; text-decoration: none; }
+.map-link:hover { border-color: var(--accent); background: var(--accent-light); }
 .notice-sheets { display: flex; flex-direction: column; gap: 14px; }
 .notice-sheets a { display: block; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); box-shadow: var(--shadow); background: var(--surface); }
 .notice-sheets img { width: 100%; height: auto; display: block; }

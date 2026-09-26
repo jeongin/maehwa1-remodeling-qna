@@ -23,7 +23,9 @@ export function knowledge() {
       images: p.answerImages, isFaq: !!p.isFaq,
       at: p.createdAt, answeredAt: p.answeredAt
     }))
-  ].sort((a, b) => ((b.answeredAt || b.at)?.seconds || 0) - ((a.answeredAt || a.at)?.seconds || 0));
+  ].sort((a, b) =>
+    (isFaqItem(b) - isFaqItem(a)) ||
+    ((b.answeredAt || b.at)?.seconds || 0) - ((a.answeredAt || a.at)?.seconds || 0));
 }
 
 export function subscribeKnowledge(onSync) {
@@ -98,12 +100,22 @@ const FIELDS = [
   ['answer', 0.4]
 ];
 
+/** 조합이 추린 항목인가. FAQ 로 지정된 조합원 질문도 포함한다. */
+export const isFaqItem = k => k.source === 'faq' || !!k.isFaq;
+
+/**
+ * 자주 묻는 질문 가산점. 칸 사이 간격(0.2)보다 작게 잡아
+ * 제목 > 본문 > 카테고리 > 답변 순서는 그대로 두고, 같은 칸 안에서만 앞세운다.
+ */
+const FAQ_BONUS = 0.15;
+const withBonus = (k, v) => v > 0 && isFaqItem(k) ? v + FAQ_BONUS : v;
+
 /** 낱말이 그대로 들어 있는 칸 중 가장 높은 순위를 점수로 준다. 0 이면 안 걸린 것. */
 export function keywordScore(k, word) {
   const w = String(word || '').toLowerCase();
   if (!w) return 0;
   for (const [field, weight] of FIELDS) {
-    if (String(k[field] || '').toLowerCase().includes(w)) return weight;
+    if (String(k[field] || '').toLowerCase().includes(w)) return withBonus(k, weight);
   }
   return 0;
 }
@@ -118,7 +130,7 @@ function fuzzyScore(k, text) {
     const raw = score(text, k[field]);
     if (raw >= 0.28) best = Math.max(best, weight * raw);
   }
-  return best;
+  return withBonus(k, best);
 }
 
 export function findSimilar(text, limit = 3, excludeId = null) {
