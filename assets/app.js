@@ -5,6 +5,20 @@ import { initBoard, subscribeBoard, openPostModal } from './board.js';
 import { initPassword } from './password.js';
 import { initAdmin, loadRoster } from './admin.js';
 
+const TABS = ['notice', 'faq', 'board', 'admin'];
+
+/** 주소의 #탭 을 읽는다. 새로고침해도 보던 탭에 그대로 남게 하려는 것. */
+const tabFromHash = () => {
+  const h = location.hash.slice(1);
+  return TABS.includes(h) ? h : 'notice';
+};
+
+function setTab(tab) {
+  state.tab = TABS.includes(tab) ? tab : 'notice';
+  if (location.hash.slice(1) !== state.tab) location.hash = state.tab;
+  applyTab();
+}
+
 function applyTab() {
   if (state.tab === 'admin' && !state.isAdmin) state.tab = 'notice';
   const tab = state.tab;
@@ -23,10 +37,10 @@ function applyTab() {
 function initShell() {
   $('tabs').addEventListener('click', e => {
     const tab = e.target.closest('.tab');
-    if (!tab) return;
-    state.tab = tab.dataset.tab;
-    applyTab();
+    if (tab) setTab(tab.dataset.tab);
   });
+  // 뒤로 가기로도 탭이 따라 움직인다.
+  window.addEventListener('hashchange', () => setTab(tabFromHash()));
 
   $('fab').addEventListener('click', () => {
     if (state.tab === 'faq') openFaqModal(); else openPostModal();
@@ -53,8 +67,7 @@ initPassword();
 initAdmin();
 
 initAuth(signedIn => {
-  if (!signedIn) state.tab = 'notice';
-  applyTab();
+  setTab(signedIn ? tabFromHash() : 'notice');
   subscribeFaq();
   subscribeBoard();
   if (signedIn && state.isAdmin) loadRoster();

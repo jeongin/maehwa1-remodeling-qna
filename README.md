@@ -113,6 +113,13 @@ node tools/import-residents.js residents.csv
 첨부가 동작합니다. 전환 직후 Google Cloud 콘솔에서 **예산 알림**을 먼저
 걸어두세요.
 
+## 탭과 주소
+
+활성 탭을 주소의 `#notice` / `#faq` / `#board` / `#admin` 에 실어둡니다.
+새로고침해도 보던 탭에 그대로 남고, 뒤로 가기로도 탭이 오갑니다.
+링크로 특정 탭을 바로 열 수도 있습니다. 로그아웃 상태에서는 안내 탭으로
+돌아갑니다.
+
 ## 읽기 횟수와 캐시
 
 `core.js` 에서 Firestore 영구 캐시(IndexedDB)를 켭니다. 목록을 그리는
