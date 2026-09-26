@@ -5,7 +5,10 @@ import { db, state, CATEGORIES, $, esc, hi, fmtAt, fillCategorySelect, renderChi
 import { knowledge, subscribeKnowledge, onKnowledge, keywordScore } from './knowledge.js';
 import { renderRichText } from './attach.js';
 
-let filter = '전체', editId = null;
+let filter = '전체', scope = '전체', editId = null;
+
+/** 찾기 탭 범위 필터 */
+const SCOPES = ['자주 묻는 질문'];
 
 function setSync(ok) {
   $('syncDot').className = ok ? 'dot' : 'dot off';
@@ -66,9 +69,10 @@ function card(i, q) {
         ${i.detail ? `<div class="qa-body">${hi(i.detail, q)}</div><div class="qa-divider"></div>` : ''}
         <span class="qa-a-mark">A</span><span class="qa-a-text">${renderRichText(i.answer, i.images, q)}</span>
         ${i.answeredAt ? `<div class="qa-stamp">답변 ${fmtAt(i.answeredAt)}</div>` : ''}
-        ${state.isAdmin && fromFaq ? `<div class="qa-item-actions">
-          <button class="btn-sm" data-act="edit">✏ 수정</button>
-          <button class="btn-sm danger" data-act="delete">🗑 삭제</button>
+        ${state.isAdmin ? `<div class="qa-item-actions">
+          ${fromFaq ? `<button class="btn-sm" data-act="edit">✏ 수정</button>
+          <button class="btn-sm danger" data-act="delete">🗑 삭제</button>`
+          : `<button class="btn-sm" data-act="faq">${i.isFaq ? '☆ 자주 묻는 질문 해제' : '⭐ 자주 묻는 질문으로'}</button>`}
         </div>` : ''}
       </div>
     </div>`;
@@ -78,9 +82,11 @@ function render() {
   const items = knowledge();
   const q = $('searchInput').value.trim().toLowerCase();
   const cats = CATEGORIES.filter(c => items.some(i => i.category === c));
+  renderChips($('faqScope'), SCOPES, scope);
   renderChips($('faqFilters'), cats, filter);
 
   let list = items;
+  if (scope === '자주 묻는 질문') list = list.filter(i => i.source === 'faq' || i.isFaq);
   if (filter !== '전체') list = list.filter(i => i.category === filter);
   // 제목 > 본문 > 카테고리 > 답변 순으로 올리고, 같은 순위면 최신 답변부터.
   if (q) list = list
@@ -110,6 +116,10 @@ export function initFaq() {
     const chip = e.target.closest('.chip');
     if (chip) { filter = chip.dataset.cat; render(); }
   });
+  $('faqScope').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (chip) { scope = chip.dataset.cat; render(); }
+  });
   $('faqList').addEventListener('click', async e => {
     const target = e.target.closest('[data-act]');
     const card = e.target.closest('.qa-item');
@@ -117,6 +127,11 @@ export function initFaq() {
     const id = card.dataset.id;
     if (target.dataset.act === 'toggle') card.classList.toggle('open');
     if (target.dataset.act === 'edit') openFaqModal(id);
+    if (target.dataset.act === 'faq') {
+      const item = knowledge().find(x => x.id === id);
+      try { await updateDoc(doc(db, 'questions', id), { isFaq: !item.isFaq, updatedAt: serverTimestamp() }); }
+      catch (err) { alert('변경 오류: ' + err.message); }
+    }
     if (target.dataset.act === 'delete' && confirm('이 항목을 삭제하시겠습니까?')) {
       try { await deleteDoc(doc(db, 'qa_items', id)); }
       catch (err) { alert('삭제 오류: ' + err.message); }

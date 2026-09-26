@@ -172,6 +172,7 @@ function card(p) {
         <div class="qa-item-actions">
           ${state.isAdmin ? `<button class="btn-sm" data-act="answer">💬 ${answered ? '답변 수정' : '답변 등록'}</button>
           <button class="btn-sm" data-act="visibility">${p.isPublic ? '🔒 비공개로' : '🌐 공개로'}</button>
+          <button class="btn-sm" data-act="faq">${p.isFaq ? '☆ 자주 묻는 질문 해제' : '⭐ 자주 묻는 질문으로'}</button>
           <button class="btn-sm" data-act="edit">✏ 질문 수정</button>` : ''}
           ${!state.isAdmin && mine && !answered ? `<button class="btn-sm" data-act="edit">✏ 수정</button>` : ''}
           ${canEdit ? `<button class="btn-sm danger" data-act="delete">🗑 삭제</button>` : ''}
@@ -243,6 +244,11 @@ export function initBoard() {
     if (act === 'toggle') cardEl.classList.toggle('open');
     if (act === 'edit') openPostModal(id);
     if (act === 'answer') openAnswerModal(id);
+    if (act === 'faq') {
+      const p = posts.find(x => x.id === id);
+      try { await updateDoc(doc(db, 'questions', id), { isFaq: !p.isFaq, updatedAt: serverTimestamp() }); }
+      catch (err) { alert('변경 오류: ' + err.message); }
+    }
     if (act === 'visibility') {
       const p = posts.find(x => x.id === id);
       try { await updateDoc(doc(db, 'questions', id), { isPublic: !p.isPublic, updatedAt: serverTimestamp() }); }
