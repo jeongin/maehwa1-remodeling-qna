@@ -6,15 +6,17 @@ import { initPassword } from './password.js';
 import { initAdmin, loadRoster } from './admin.js';
 
 function applyTab() {
-  if (state.tab === 'admin' && !state.isAdmin) state.tab = 'faq';
+  if (state.tab === 'admin' && !state.isAdmin) state.tab = 'notice';
   const tab = state.tab;
+  $('panel-notice').hidden = tab !== 'notice';
   $('panel-faq').hidden = tab !== 'faq';
   $('panel-board').hidden = tab !== 'board';
   $('panel-admin').hidden = tab !== 'admin';
   $('tab-admin').hidden = !state.isAdmin;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   // FAQ 는 관리자만 등록. 질문 등록하기는 조합원과 관리자 모두 작성한다.
-  $('fab').hidden = !state.user || tab === 'admin' || (tab === 'faq' && !state.isAdmin);
+  $('fab').hidden = !state.user || tab === 'notice' || tab === 'admin'
+    || (tab === 'faq' && !state.isAdmin);
   $('fab').title = tab === 'faq' ? '새 Q&A 추가' : '질문 작성';
 }
 
@@ -51,7 +53,7 @@ initPassword();
 initAdmin();
 
 initAuth(signedIn => {
-  if (!signedIn) state.tab = 'faq';
+  if (!signedIn) state.tab = 'notice';
   applyTab();
   subscribeFaq();
   subscribeBoard();

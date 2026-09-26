@@ -89,14 +89,30 @@
     </div>
   </div>
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="faq">기존 질문/답변 찾기</button>
+    <button class="tab active" data-tab="notice">총회 안건 안내</button>
+    <button class="tab" data-tab="faq">기존 질문/답변 찾기</button>
     <button class="tab" data-tab="board">질문 등록하기</button>
     <button class="tab" id="tab-admin" data-tab="admin" hidden>조합원 관리</button>
   </div>
 </header>
 
-<!-- ── 자주 묻는 질문 ── -->
-<main id="panel-faq">
+<!-- ── 총회 안건 안내 ── -->
+<main id="panel-notice">
+  <div class="notice-head">
+    <h2>2026년 정기총회 안건 안내</h2>
+    <p>일시 2026. 10. 16.(금) 오후 7시 · 장소 성남시청 1층 온누리홀</p>
+  </div>
+  <div class="notice-sheets">
+    <a href="assets/notice/main1.jpg" target="_blank" rel="noopener"><img src="assets/notice/main1.jpg" width="1414" height="2000" alt="정기총회 안건 안내 1 — 20개 안건 분류"></a>
+    <a href="assets/notice/main2.jpg" target="_blank" rel="noopener"><img src="assets/notice/main2.jpg" width="1414" height="2000" loading="lazy" alt="정기총회 안건 안내 2 — 설계변경 골든타임"></a>
+    <a href="assets/notice/main3.jpg" target="_blank" rel="noopener"><img src="assets/notice/main3.jpg" width="1414" height="2000" loading="lazy" alt="정기총회 안건 안내 3 — 설문 3문항"></a>
+  </div>
+  <div class="notice-foot">이미지를 누르면 원본 크기로 볼 수 있습니다.<br>
+    이 안내문은 이해를 돕기 위한 요약이며, 정확한 내용은 총회 책자를 기준으로 합니다.</div>
+</main>
+
+<!-- ── 기존 질문/답변 찾기 ── -->
+<main id="panel-faq" hidden>
   <div class="notice">🔎 <strong>질문하기 전에 여기서 먼저 찾아보세요.</strong>
     조합이 정리한 자주 묻는 질문과, 답변이 끝난 공개 질문을 함께 검색합니다.</div>
   <div class="search-wrap">
@@ -240,7 +256,7 @@
     </div>
     <label class="check-row">
       <input type="checkbox" id="aToFaq">
-      <span>이 답변을 <strong>자주 묻는 질문</strong>에도 등록</span>
+      <span>이 질문에 <strong>자주 묻는 질문</strong> 표시 달기</span>
     </label>
     <div class="form-actions">
       <button class="btn-cancel" data-close="answerModal">취소</button>

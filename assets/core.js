@@ -49,7 +49,7 @@ export const PW_PREFIX = 'mh1!';
 export const CATEGORIES = ['법무·세무·회계', '설계', '이주·이주비', '총회', '주민설명회', '기타'];
 
 /** 화면 전체가 공유하는 상태 */
-export const state = { user: null, isAdmin: false, dong: '', ho: '', tab: 'faq' };
+export const state = { user: null, isAdmin: false, dong: '', ho: '', tab: 'notice' };
 
 export const $ = id => document.getElementById(id);
 

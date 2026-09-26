@@ -20,7 +20,8 @@ export function knowledge() {
       id: p.id, source: 'board', category: p.category,
       question: p.title, detail: p.content, answer: p.answer,
       who: p.authorDong && p.authorHo ? `${p.authorDong}동 ${p.authorHo}호` : '',
-      images: p.answerImages, at: p.createdAt, answeredAt: p.answeredAt
+      images: p.answerImages, isFaq: !!p.isFaq,
+      at: p.createdAt, answeredAt: p.answeredAt
     }))
   ].sort((a, b) => ((b.answeredAt || b.at)?.seconds || 0) - ((a.answeredAt || a.at)?.seconds || 0));
 }

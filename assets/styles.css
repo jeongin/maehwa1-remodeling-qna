@@ -53,8 +53,9 @@ header { background: var(--accent); color: white; position: sticky; top: 0; z-in
 .btn-header:hover { background: rgba(255,255,255,0.25); }
 
 /* ── 탭 ── */
-.tabs { max-width: 760px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; }
-.tab { background: none; border: none; border-bottom: 3px solid transparent; color: rgba(255,255,255,0.65); padding: 9px 14px; font-size: 0.88rem; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.tabs { max-width: 760px; margin: 0 auto; padding: 0 24px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { background: none; border: none; border-bottom: 3px solid transparent; color: rgba(255,255,255,0.65); padding: 9px 14px; font-size: 0.88rem; font-family: 'Noto Sans KR', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.15s; white-space: nowrap; flex: 0 0 auto; }
 .tab:hover { color: white; }
 .tab.active { color: white; border-bottom-color: var(--accent2); font-weight: 700; }
 
@@ -176,6 +177,13 @@ select.form-control { appearance: none; background-image: url("data:image/svg+xm
 .att-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .att-row .att { display: block; text-decoration: none; width: 110px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
 .att-row .att img { width: 100%; height: auto; display: block; }
+.notice-head { text-align: center; margin-bottom: 18px; }
+.notice-head h2 { font-family: 'Noto Serif KR', serif; font-size: 1.3rem; color: var(--accent); line-height: 1.4; word-break: keep-all; }
+.notice-head p { font-size: 0.82rem; color: var(--text-muted); margin-top: 8px; line-height: 1.6; word-break: keep-all; }
+.notice-sheets { display: flex; flex-direction: column; gap: 14px; }
+.notice-sheets a { display: block; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); box-shadow: var(--shadow); background: var(--surface); }
+.notice-sheets img { width: 100%; height: auto; display: block; }
+.notice-foot { font-size: 0.74rem; color: var(--text-muted); text-align: center; line-height: 1.7; margin-top: 16px; }
 mark { background: #fff3b0; color: inherit; border-radius: 2px; padding: 0 1px; }
 .spinner-wrap { display: flex; justify-content: center; padding: 48px; }
 .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
@@ -184,6 +192,7 @@ mark { background: #fff3b0; color: inherit; border-radius: 2px; padding: 0 1px; 
 @media (max-width: 500px) {
   .header-title { font-size: 1rem; }
   .header-inner, .tabs { padding-left: 14px; padding-right: 14px; }
+  .tab { font-size: 0.8rem; padding: 9px 10px; }
   main { padding: 16px 12px 90px; }
   .qa-question { padding: 12px; }
   .qa-answer { padding: 12px 12px 14px 44px; }

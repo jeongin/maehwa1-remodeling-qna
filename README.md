@@ -10,6 +10,7 @@ assets/styles.css     스타일
 assets/core.js        Firebase 초기화 · 공용 상수/헬퍼
 assets/auth.js        로그인 게이트 (동호수 + 휴대폰 뒷자리, 관리자 이메일)
 assets/faq.js         기존 질문/답변 찾기 탭
+assets/notice/        총회 안건 안내 포스터 (첫 화면)
 assets/knowledge.js   FAQ+공개 Q&A 통합 검색 · 유사 질문 탐색
 assets/image.js       붙여넣은 이미지 축소 · 재인코딩
 assets/attach.js      Storage 업로드 · 인라인 마커 렌더
@@ -157,8 +158,11 @@ FAQ와 게시판이 같은 목록을 씁니다. `assets/core.js` 의 `CATEGORIES
   "어떻게 / 하나요" 같은 질문 어미는 걸러서 엉뚱한 글이 걸리지 않게 합니다.
 
 관리자는 답변 모달에서 비슷한 기존 답변을 **이 답변 연결** 로 그대로
-가져올 수 있고(`linkedId` 로 흔적을 남깁니다), **자주 묻는 질문에도 등록**
-을 체크하면 같은 내용이 `qa_items` 로도 쌓입니다.
+가져올 수 있습니다(`linkedId` 로 흔적을 남깁니다).
+
+**자주 묻는 질문 표시 달기** 를 체크하면 그 질문에 `isFaq` 플래그가 붙고
+목록에 태그로 표시됩니다. 예전에는 `qa_items` 로 복사본을 만들어 같은
+질문이 두 번 보였습니다.
 
 | 컬렉션 | 용도 | 읽기 권한 |
 |---|---|---|

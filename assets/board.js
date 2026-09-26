@@ -1,4 +1,4 @@
-import { collection, query, where, orderBy, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, doc, serverTimestamp }
+import { collection, query, where, orderBy, onSnapshot, setDoc, updateDoc, deleteDoc, doc, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { db, state, CATEGORIES, $, esc, fmtAt, fillCategorySelect, renderChips, openModal, closeModal, emptyState }
   from './core.js';
@@ -107,7 +107,7 @@ function openAnswerModal(id) {
   const p = posts.find(x => x.id === id);
   $('answerQuote').textContent = `[${p.category}] ${p.title}\n\n${p.content}`;
   $('aContent').value = p.answer || '';
-  $('aToFaq').checked = false;
+  $('aToFaq').checked = !!p.isFaq;
   $('aLinked').hidden = true;
   answerAttach.reset(p.answerImages, id);
   renderSuggestions($('aSuggest'), `${p.title} ${p.content}`, {
@@ -129,16 +129,11 @@ async function saveAnswer() {
     await updateDoc(doc(db, 'questions', answerId), {
       answer, status: answer ? 'answered' : 'pending',
       answerImages: answerAttach.items(),
+      // 복사본을 만들지 않고 이 질문에 표시만 단다. 목록에 두 번 뜨지 않는다.
+      isFaq: !!answer && $('aToFaq').checked,
       answeredAt: serverTimestamp(),
       ...(linkedId ? { linkedId } : {})
     });
-    // 같은 내용을 FAQ 에도 쌓아두면 다음 사람이 검색으로 먼저 찾는다.
-    if (answer && $('aToFaq').checked) {
-      await addDoc(collection(db, 'qa_items'), {
-        category: p.category, question: p.title, answer,
-        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-      });
-    }
     closeModal('answerModal');
   } catch (e) { alert('저장 오류: ' + e.message); }
   btn.disabled = false;
