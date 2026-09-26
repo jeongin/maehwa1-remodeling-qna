@@ -170,7 +170,7 @@ export function renderSuggestions(el, text, opts = {}) {
         <div class="sug-main">
           <div class="sug-meta">
             <span class="qa-tag">${esc(k.category || '기타')}</span>
-            <span class="sug-src">${k.source === 'faq' ? '자주 묻는 질문' : '조합원 질문'}</span>
+            ${k.source === 'faq' || k.isFaq ? '<span class="sug-src">자주 묻는 질문</span>' : ''}
           </div>
           <div class="sug-q">${esc(k.question)}</div>
           <div class="sug-a" hidden>${esc(k.answer)}</div>

@@ -55,8 +55,7 @@ function card(i, q) {
           <div class="qa-q-text">${hi(i.question, q)}</div>
           <div class="qa-meta">
             ${i.category ? `<span class="qa-tag">${hi(i.category, q)}</span>` : ''}
-            <span class="status ${fromFaq ? 'answered' : 'open'}">${fromFaq ? '자주 묻는 질문' : '조합원 질문'}</span>
-            ${!fromFaq && i.isFaq ? '<span class="status answered">자주 묻는 질문</span>' : ''}
+            ${fromFaq || i.isFaq ? '<span class="status answered">자주 묻는 질문</span>' : ''}
             ${i.who ? `<span class="qa-author">${esc(i.who)}</span>` : ''}
             <span class="qa-date">${fromFaq ? '' : '질문 '}${fmtAt(i.at)}</span>
           </div>
